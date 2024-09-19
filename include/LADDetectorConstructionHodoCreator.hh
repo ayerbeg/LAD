@@ -13,15 +13,17 @@
 #include <vector>
 // #include "G4VSensitiveDetector.hh"
 // #include "LADHodoSD.hh"
+#include "LADMaterials.hh"
+
 
 
 using namespace std;
 
-class G4LogicalVolume;
+
 class G4VPhysicalVolume;
 
-class LADMaterials;
-class G4PVPlacement;
+//class LADMaterials;
+
 
 class LADDetectorConstructionHodoCreator
 {

@@ -1,8 +1,8 @@
 #----------------------------------------------------------------------------
 # Setup the project
 
-#cmake_minimum_required(VERSION 3.28.2)
-cmake_minimum_required(VERSION 2.8...3.27)
+cmake_minimum_required(VERSION 3.28.2)
+#cmake_minimum_required(VERSION 2.8...3.27)
 
 project(LAD)
 

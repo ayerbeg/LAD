@@ -23,7 +23,7 @@ void LADActionInitialization::BuildForMaster() const
   // I believe this is for multithreading...
   G4cout<<" LADActionInitialization::BuildForMaster()"<<G4endl;
 
-
+  /*
   HodoAnalysis *
     HodoHandler = new HodoAnalysis();
    
@@ -31,6 +31,7 @@ void LADActionInitialization::BuildForMaster() const
     histo = new HistoManager();
   
   SetUserAction(new LADRunAction(histo, HodoHandler) );
+  */
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -47,7 +48,7 @@ void LADActionInitialization::Build() const
 					      
   // Actions
   // I am using old way to declare the actions instead of using 'auto'
-  PrimaryGeneratorAction * GeneratorAction = new PrimaryGeneratorAction();
+  LADPrimaryGeneratorAction * GeneratorAction = new LADPrimaryGeneratorAction();
   SetUserAction(GeneratorAction);
 
   LADRunAction *  runAction = new LADRunAction(histo, HodoHandler);

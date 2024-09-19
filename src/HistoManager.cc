@@ -60,6 +60,13 @@ void HistoManager::Book()
   eventtree -> Branch("vPDG", &vPDG );
   eventtree -> Branch("vLevel", &vLevel );
 
+
+  eventtree -> Branch("vXbar", &vXbar );
+  eventtree -> Branch("vYbar", &vYbar );
+  eventtree -> Branch("vZbar", &vZbar );
+  eventtree -> Branch("vPadPosition", &vPadPosition );
+
+  
   // create 1st ntuple
   // fNtuple1 = new TTree("Ntuple1", "Edep");
   // fNtuple1->Branch("Eabs", &fEabs, "Eabs/D");
@@ -158,6 +165,10 @@ void HistoManager::FillTest(G4int ID)
   vPDG.clear();
   vLevel.clear();
 
+  vXbar.clear();
+  vYbar.clear();
+  vZbar.clear();
+  vPadPosition.clear();
   // if (fNtuple1 != nullptr) { fNtuple1->Fill(); }
   // if (fNtuple2 != nullptr) { fNtuple2->Fill(); }
 }

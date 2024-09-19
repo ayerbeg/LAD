@@ -64,7 +64,6 @@ HodoAnalysis::~HodoAnalysis()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 void HodoAnalysis::BeginOfRunAction(const G4Run *aRun)
 {
-  // although a pointer is brought here, it is not working correctly.
 
   G4cout<<"<HodoAnalysis::BeginOfRunAction>: begin"<<G4endl;
 
@@ -216,6 +215,10 @@ void HodoAnalysis::BeginOfEventAction(const G4Event *anEvent)
   vPDG.clear();
   vLevel.clear();
 
+  vPadPosition.clear();
+  vXbar.clear();
+  vYbar.clear();
+  vZbar.clear();
   
   //  G4cout<<"<HodoAnalysis::BeginOfEventAction>: Leaving..."<<G4endl;
 }
@@ -470,23 +473,31 @@ HodoAnalysis::StepAnalysis(const G4Step *aStep)
       vEneDep.push_back(edep);
       vPadNum.push_back(post_copyNumber);
       vPDG.push_back(PDGID);
-      vLevel.push_back(ParticleLevel);
-      
-      // // WOW!! It seems that this condition will work
-      // if (pre_copyNumber != post_copyNumber)
-      // 	{ 
-      // 	  // get the energy, copy number and store in a variable (maybe a vector)
-      // 	  // that will be stored in the rootfile
-
-      // 	  //	  fEventAction->FillEvent(pre_copyNumber, EnergyAbs);
-      // 	  EnergyAbs = 0;
-	  
-      // 	  G4cout<<"HEY!!! I AM OUT!!\n"<<G4endl;
-      // 	}
-      
+      vLevel.push_back(ParticleLevel);// if it is primary or secondary
+            
     }
 
-//  G4double stepl = 0.;
+  // This condition warrants that we are in the World and there is no crash with
+  // Exit/Entry condition when particle goes OutOfWorld
+  if ( actualTrack->GetNextVolume())
+    {
+      // This cross check when enter into the bar
+      bool BarEntrance = (Exit(actualTrack, "SciWall")&& Entry(actualTrack, "Bar_phy"));
+      //   G4cout<<"BarEntrance: "<< BarEntrance<< G4endl;
+      
+      if(BarEntrance)
+	{
+	  //  G4cout << "11"<<G4endl;
+	  G4ThreeVector Position = actualTrack->GetPosition();
+	  vPadPosition.push_back(post_copyNumber);
+	  vXbar.push_back(Position.x());
+	  vYbar.push_back(Position.y());
+	  vZbar.push_back(Position.z());
+	  //	  G4cout<<"Position at Hodo: "<<Position/cm<<G4endl;
+	}
+    }
+  
+  //  G4double stepl = 0.;
 
 //   if (aStep->GetTrack()->GetDefinition()->GetPDGCharge() != 0.)
 //     stepl = aStep->GetStepLength();
@@ -811,7 +822,7 @@ HodoAnalysis::Counter()
     }
 }
 
-
+*/
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 // These methods just check if particles enter a volume different to the present (Entry)
 // or leaves the volume (Exit)
@@ -819,10 +830,11 @@ HodoAnalysis::Counter()
 G4bool 
 HodoAnalysis::Entry(G4Track* actualTrack,G4String Volumen)
 {
-  G4cout<<"Entry "<<Volumen<<G4endl;
+  //  G4cout<<"Entry "<<Volumen<<G4endl;
   G4String ActualVolume = actualTrack->GetVolume()->GetName();
   G4String NextVolume = actualTrack->GetNextVolume()->GetName();
-  G4cout<< ActualVolume<<G4endl;
+  //  G4cout<< ActualVolume<<G4endl;
+  
   if ((ActualVolume != Volumen) 
       && (NextVolume == Volumen))
     return true;
@@ -833,7 +845,7 @@ HodoAnalysis::Entry(G4Track* actualTrack,G4String Volumen)
 G4bool 
 HodoAnalysis::Exit(G4Track* actualTrack, G4String Volumen)
 {
-    G4cout<<"Exit "<<Volumen<<G4endl;
+  //  G4cout<<"Exit "<<Volumen<<G4endl;
     G4String ActualVolume = actualTrack->GetVolume()->GetName();
     G4String NextVolume = actualTrack->GetNextVolume()->GetName();
   if ((ActualVolume == Volumen) 
@@ -844,7 +856,7 @@ HodoAnalysis::Exit(G4Track* actualTrack, G4String Volumen)
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
-
+/*
 
 void 
 HodoAnalysis::CheckAkzeptiert()

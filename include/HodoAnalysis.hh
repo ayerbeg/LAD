@@ -42,6 +42,8 @@
 
 
 
+#include "CLHEP/Vector/ThreeVector.h"
+using namespace CLHEP;
 
 
 #include <TFile.h>
@@ -81,6 +83,8 @@ class G4Step;
 // #include "TRandom2.h"
 
 //tuple<G4int, G4int, G4int> paddle(G4int);
+
+using namespace std;
 
 class HodoAnalysis {
   
@@ -142,7 +146,13 @@ public:
   vector<G4int>    GetLevel()  {return vLevel;}
 
 
+
+  vector<G4int>    GetPadPosition()  {return vPadPosition;}
+  vector<G4double> GetXpos() {return vXbar;}
+  vector<G4double> GetYpos() {return vYbar;}
+  vector<G4double> GetZpos() {return vZbar;}  
   
+    
 private:
   void fillPerEvent(G4double, G4double, G4double, G4double);        
 
@@ -179,7 +189,13 @@ private:
   vector<G4int>    vPadNum;
   vector<G4int>    vPDG;
   vector<G4int>    vLevel;
-  
+
+
+  // These variables only for position at the bars
+  vector<G4int>    vPadPosition;
+  vector<G4double> vXbar;
+  vector<G4double> vYbar;
+  vector<G4double> vZbar;
   
 
   G4double EnergyTemp;

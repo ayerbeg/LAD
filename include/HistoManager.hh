@@ -48,6 +48,13 @@ public:
   void SetEDepTot(vector<G4double> v){vEneDep = v;}
   void SetPDG(vector<G4int> v){vPDG = v;}
   void SetLevel(vector<G4int> v){vLevel = v;}
+
+  //Need to modify how to store the data
+  void SetPadPosition(vector<G4int> v){vPadPosition = v;}
+  void SetXbar(vector<G4double> v){vXbar = v;}
+  void SetYbar(vector<G4double> v){vYbar = v;}
+  void SetZbar(vector<G4double> v){vZbar = v;}
+
   
 private:
 
@@ -76,6 +83,15 @@ private:
   vector<G4int>    vPadCopy;
   vector<G4int>    vPDG;
   vector<G4int>    vLevel;
+
+
+  // These variables only for position at the bars
+  vector<G4int>    vPadPosition;
+  vector<G4double> vXbar;
+  vector<G4double> vYbar;
+  vector<G4double> vZbar;
+  
+  
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

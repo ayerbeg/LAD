@@ -39,7 +39,7 @@ void LADDetectorConstructionHodoCreator::BuildHodo(G4LogicalVolume *worldLV, LAD
   // the whole construction could be improved
   WallWidth = (Constants -> NoOfBars * width) + 1*cm; //The total width of the Bars WITHOUT separation + 1 cm spac
   WallThick = thick + 1*cm;
-  WallLength = length + 1*cm; // not cool! this only works if we have the Bars are sorted from long to short
+  WallLength = length + 1*cm; // not cool! this only works if we have the Bars sorted from long to short
 
 
   G4cout<<"WallWidth: "<<WallWidth<<" WallLength: "<<WallLength<<G4endl;
@@ -62,7 +62,8 @@ void LADDetectorConstructionHodoCreator::BuildHodo(G4LogicalVolume *worldLV, LAD
   // Z: direction of the beam (downstream)
   // Y: up to the hall
   // X: to the left looking downstream 
- 
+
+  // the central detector is at 127deg
   angleW[0] = (Variables -> centralWallAngle) + (Variables -> leftWallAngle);
   angleW[1] =  Variables -> centralWallAngle;
   angleW[2] = (Variables -> centralWallAngle) - (Variables -> rightWallAngle);

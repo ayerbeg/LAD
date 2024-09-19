@@ -3,7 +3,7 @@
 
 #include "G4VUserActionInitialization.hh"
 
-#include "PrimaryGeneratorAction.hh"
+#include "LADPrimaryGeneratorAction.hh"
 #include "LADRunAction.hh"
 #include "LADEventAction.hh"
 #include "LADSteppingAction.hh"
@@ -12,7 +12,7 @@
 #include "HodoAnalysis.hh"
 class HodoAnalysis;
 
-class PrimaryGeneratorAction;
+class LADPrimaryGeneratorAction;
 class LADDetectorConstruction;
 class HistoManager;
 class LADRunAction;

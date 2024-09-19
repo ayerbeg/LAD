@@ -97,6 +97,9 @@ G4VPhysicalVolume* LADDetectorConstruction::DefineVolumes()
 void LADDetectorConstruction::ConstructSDandField()
 {
   G4SDManager::GetSDMpointer()->SetVerboseLevel(1);
+
+
+  GEMCreator -> ConstructSDandField();
   //
   // Scorers
   //

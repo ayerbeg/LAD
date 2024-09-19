@@ -172,8 +172,14 @@ void LADEventAction::EndOfEventAction(const G4Event* event)
  fHistoManager->SetPDG(AnalysisHodo    -> GetPDG() );
  fHistoManager->SetLevel(AnalysisHodo  -> GetLevel() );
 
+ 
+ fHistoManager->SetPadPosition(AnalysisHodo -> GetPadPosition() );
+ fHistoManager->SetXbar(AnalysisHodo  -> GetXpos() );
+ fHistoManager->SetYbar(AnalysisHodo  -> GetYpos() );
+ fHistoManager->SetZbar(AnalysisHodo  -> GetZpos() );
 
 
+   
  fHistoManager->FillTest(eventID);
  
  

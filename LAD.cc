@@ -12,7 +12,7 @@
 
 #include "LADDetectorConstruction.hh"
 #include "LADActionInitialization.hh"
-#include "PrimaryGeneratorAction.hh"
+#include "LADPrimaryGeneratorAction.hh"
 #include "LADRunAction.hh"
 #include "LADSteppingAction.hh"
 
