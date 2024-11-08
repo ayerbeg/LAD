@@ -27,10 +27,11 @@
 #include "G4VisExecutive.hh"
 
 #include "G4UIterminal.hh"
+#include <G4UItcsh.hh>
 
 #include "FTFP_BERT.hh"
 #include "Randomize.hh"
-
+ 
 
 
 #include "G4ScoringManager.hh"
@@ -202,37 +203,31 @@ int main(int argc,char** argv)
   // Process macro or start UI session
   //
 
-
-  G4cout << "LAD main: 1" << G4endl;
-  G4cout << "LAD main: 2" << G4endl;
-  G4cout << "LAD main: 3 "<< macro.size() << G4endl;
-
   if ( macro.size() )
     {
-      G4cout << "LAD main: 3" << G4endl;
       // batch mode
       G4String command = "/control/execute ";
       UImanager->ApplyCommand(command+macro);
     }
   else
     {
-      G4cout << "LAD main: 4a: " << Variables->G4GUI<< G4endl;
       if(Variables->G4GUI)
 	{
-	  G4cout << "LAD main: 4" << G4endl;
+	  //	  G4cout << "LAD main: 4" << G4endl;
 	  // G4UIterminal is a (dumb) terminal.
 	  G4UIsession * session = 0;
-#ifdef G4UI_USE
+	  // I use the ini file to select the terminal or GUI
+	  // no need of the pre-compiler definitions
+//#ifdef G4UI_USE
 	  session = new G4UIterminal(new G4UItcsh);
-#else
-	  session = new G4UIterminal();
-#endif
+// #else
+// 	  session = new G4UIterminal();
+// #endif
 	  session->SessionStart();
 	  delete session;
     	}
       else
 	{
-	  G4cout << "LAD main: 5" << G4endl;
 	  // interactive mode : define UI session
 	  UImanager->ApplyCommand("/control/execute init_vis.mac");
 	  if (ui->IsGUI())

@@ -44,8 +44,7 @@ void LADDetectorConstructionGEMCreator::BuildGEM(G4LogicalVolume *worldLV, LADMa
 
   G4ThreeVector pos(0,0,0);
 
-  //number of GEMs planes
-  G4int nplanes = 2;
+
 
   // the dimensions of each of the GEM planes
   // these are the container of the layers
@@ -319,17 +318,17 @@ void LADDetectorConstructionGEMCreator::BuildGEM(G4LogicalVolume *worldLV, LADMa
 	      G4cout<<gemplogname<<" created"<<G4endl;
 	      // due to the fact that we are not changing the declaration of the logic volume
 	      // but just the name, not as I did with the HODO, this is the best way to handle the SD
-	      gplog_driftgas = new G4LogicalVolume( gpbox, gempm[gpidx], gemplogname, 0, 0, 0 );
+	      gplog_driftgas[gidx] = new G4LogicalVolume( gpbox, gempm[gpidx], gemplogname, 0, 0, 0 );
 	      
 	      new G4PVPlacement( 0, G4ThreeVector( 0.0, 0.0, ztemp - gempzsum/2.0 ),
-				 gplog_driftgas,
+				 gplog_driftgas[gidx],
 				 gempphysname,
 				 gemlog, false, 0, false ); 
 	
 	      ztemp += sign*gempz[gpidx]/2.0;
-	      gplog_driftgas -> SetVisAttributes(G4VisAttributes(GEMcolor[gpidx])); // every logical volume has a color (useless but funny)
+	      gplog_driftgas[gidx]  -> SetVisAttributes(G4VisAttributes(GEMcolor[gpidx])); // every logical volume has a color (useless but funny)
 
-	      log_sd.push_back(gplog_driftgas);
+	      log_sd.push_back(gplog_driftgas[gidx]);
 	    }
 	  else
 	    {
@@ -380,7 +379,7 @@ void LADDetectorConstructionGEMCreator::ConstructSDandField()
   // In g4sbs, the declaration of SD happen within the construction of the code.
   // I am trying to separate it in a different method.
 
-
+  /*
   //Create sensitive detector for this tracker:
   G4String GEMSDname = SDname;
   G4String GEMSDname_nopath = SDname;
@@ -389,18 +388,36 @@ void LADDetectorConstructionGEMCreator::ConstructSDandField()
   GEMcolname += "HitsCollection";
 
   G4cout<<"GEMcolname: "<<GEMcolname<<G4endl;
+  */
+
+  
+  G4SDManager* SDManager = G4SDManager::GetSDMpointer();
+  G4String SDname;
+  LADGEMSD* chamber1 = new LADGEMSD("/chamber1");
+  SDManager->AddNewDetector(chamber1);
+  //fWirePlane1Logical->SetSensitiveDetector(chamber1);
+  
+  LADGEMSD* chamber2 = new LADGEMSD(SDname="/chamber2");
+  SDManager->AddNewDetector(chamber2);
+  //  fWirePlane2Logical->SetSensitiveDetector(chamber2);
+
+
+
   
     // Create a sensitive detector
-  G4SDManager* SDmanager = G4SDManager::GetSDMpointer();
-  LADGEMSD *GEMSD = new LADGEMSD("GEM_SD", GEMcolname, log_sd.size());
-  SDmanager -> AddNewDetector(GEMSD);
 
-   for(int kk = 0; kk < log_sd.size(); kk++)
-    {
-     log_sd[kk] -> SetSensitiveDetector(GEMSD);
 
-    }
+  //  LADGEMSD *GEMSD = new LADGEMSD("GEM_SD", GEMcolname, log_sd.size());
+  // SDmanager -> AddNewDetector(GEMSD);
 
+   // for(int kk = 0; kk < log_sd.size(); kk++)
+   //  {
+   //   log_sd[kk] -> SetSensitiveDetector(GEMSD);
+   //  }
+
+
+   log_sd[0] -> SetSensitiveDetector(chamber1);
+   log_sd[1] -> SetSensitiveDetector(chamber2);
 
   
   /*

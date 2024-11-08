@@ -19,7 +19,9 @@ class G4HCofThisEvent;
 /// The values are accounted in hits in ProcessHits() function which is called
 /// by Geant4 kernel at each step.
 
-class LADGEMSD : public G4VSensitiveDetector
+
+/*
+class LADGEMSD: public G4VSensitiveDetector
 {
   public:
     LADGEMSD(const G4String& name,
@@ -35,8 +37,23 @@ class LADGEMSD : public G4VSensitiveDetector
     GEMHitsCollection* fHitsCollection = nullptr;
     G4int fNofCells = 0;
 };
+*/
 
+class LADGEMSD : public G4VSensitiveDetector
+{
+  public:
+    LADGEMSD(G4String name);
+    ~LADGEMSD() override = default;
 
+    void Initialize(G4HCofThisEvent*HCE) override;
+    G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist) override;
+  void   EndOfEvent(G4HCofThisEvent* hitCollection) override;
+
+  private:
+  LADGEMHitsCollection* fHitsCollection = nullptr;
+  //  DriftChamberHitsCollection* fHitsCollection = nullptr;
+    G4int fHCID = -1;
+};
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
