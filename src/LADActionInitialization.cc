@@ -40,12 +40,14 @@ void LADActionInitialization::Build() const
 {
   G4cout<<" LADActionInitialization::Build()"<<G4endl;
 
-  HodoAnalysis *
-    HodoHandler = new HodoAnalysis();
-
+ 
   HistoManager *
     histo = new HistoManager();
-					      
+
+  HodoAnalysis *
+    HodoHandler = new HodoAnalysis(histo);
+ 
+  
   // Actions
   // I am using old way to declare the actions instead of using 'auto'
   LADPrimaryGeneratorAction * GeneratorAction = new LADPrimaryGeneratorAction();

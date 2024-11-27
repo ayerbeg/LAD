@@ -90,13 +90,26 @@ G4bool LADGEMSD::ProcessHits(G4Step* step,
 
   // energy deposit
   auto edep = step->GetTotalEnergyDeposit();
+
+
+  G4int ParticleLevel = step->GetTrack()-> GetTrackID();
+  G4int PDGID = step->GetTrack()->GetDefinition()-> GetPDGEncoding();
   
   auto hit = new LADGEMHit(copyNo);
+
+
+  // this is similar to the SteppingAction analysis
+  // But I don't know how this behave with multiple
+  // interactions in a given event
+  
   hit->SetWorldPos(worldPos);
   hit->SetLocalPos(localPos);
   hit->SetTime(preStepPoint->GetGlobalTime());
 
   hit->Add(edep);
+
+  hit->SetPDG(PDGID);
+  hit->SetLevel(ParticleLevel);
 
   fHitsCollection->insert(hit);
 

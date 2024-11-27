@@ -42,9 +42,10 @@
 
 #include "HodoAnalysis.hh"
 
-HodoAnalysis::HodoAnalysis()
+HodoAnalysis::HodoAnalysis(HistoManager* histo)
 {
   G4cout << "<HodoAnalysis::HodoAnalysis> Running ***************************************" <<G4endl;
+  if (histo!=NULL) fHistoManager=histo;
   // rootfile = NULL;
   // rootfile = CreateSaveFile("HodoFile");
 }
@@ -82,29 +83,6 @@ void HodoAnalysis::BeginOfRunAction(const G4Run *aRun)
 
 
   
-  // These variables are initialized here because is the summary of the run
-  // sumEAbs = sum2EAbs =sumEGap = sum2EGap = 0.;
-  // sumLAbs = sum2LAbs =sumLGap = sum2LGap = 0.; 
-
-  // G4cout<<"to createsave"<<G4endl;
-  
-  // // It was at the beggining of the class, perhaps here we can create a root file every run
-  // rootfile = CreateSaveFile("HodoFile");
-
-
-  
-  //Here we define some variable will be in the root file, should be adapted according our needs
-  // hittree = new TTree("hittree","module hits");
-  // hittree->Branch("hit",&hit.EventID, "EventID/I:Module/I:EDepMod/F:Layer/I:EDepLay/F:EDep/F");
-
-  // eventtree = new TTree("eventtree","Calorimeter Summary");
-  // eventtree->Branch("event",&event.EventID, "EventID/I:EDepTot/F:PosCal[3]/F");
-
-  // settree = new TTree("settree","Calorimeter Settings");
-  // settree->Branch("set",&set.runID, "runID/I:noCol/I:noRow/I");
-
-  //  G4cout<<"<HodoAnalysis::BeginOfRunAction>: leaving...."<<G4endl;
-  
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
@@ -120,57 +98,6 @@ void HodoAnalysis::EndOfRunAction(const G4Run  *aRun)
     }
 
 
-  /*
-  //compute statistics: mean and rms
-  //
-  sumEAbs /= NbOfEvents; sum2EAbs /= NbOfEvents;
-  G4double rmsEAbs = sum2EAbs - sumEAbs*sumEAbs;
-  if (rmsEAbs >0.) rmsEAbs = std::sqrt(rmsEAbs); else rmsEAbs = 0.;
-    
-  sumEGap /= NbOfEvents; sum2EGap /= NbOfEvents;
-  G4double rmsEGap = sum2EGap - sumEGap*sumEGap;
-  if (rmsEGap >0.) rmsEGap = std::sqrt(rmsEGap); else rmsEGap = 0.;
-    
-  sumLAbs /= NbOfEvents; sum2LAbs /= NbOfEvents;
-  G4double rmsLAbs = sum2LAbs - sumLAbs*sumLAbs;
-  if (rmsLAbs >0.) rmsLAbs = std::sqrt(rmsLAbs); else rmsLAbs = 0.;
-    
-  sumLGap /= NbOfEvents; sum2LGap /= NbOfEvents;
-  G4double rmsLGap = sum2LGap - sumLGap*sumLGap;
-  if (rmsLGap >0.) rmsLGap = std::sqrt(rmsLGap); else rmsLGap = 0.;
-    
-  //print
-  //
-  G4cout
-  << "\n--------------------End of Run------------------------------\n"
-  << "\n mean Energy in Absorber : " << G4BestUnit(sumEAbs,"Energy")
-  << " +- "                          << G4BestUnit(rmsEAbs,"Energy")  
-  << "\n mean Energy in Gap      : " << G4BestUnit(sumEGap,"Energy")
-  << " +- "                          << G4BestUnit(rmsEGap,"Energy")
-  << G4endl;
-    
-  G4cout
-  << "\n mean trackLength in Absorber : " << G4BestUnit(sumLAbs,"Length")
-  << " +- "                               << G4BestUnit(rmsLAbs,"Length")  
-  << "\n mean trackLength in Gap      : " << G4BestUnit(sumLGap,"Length")
-  << " +- "                               << G4BestUnit(rmsLGap,"Length")
-  << "\n------------------------------------------------------------\n"
-  << G4endl;
-  
-  //we send the variables for this setup, so the root analysis is independent of the set-up
-  // set.runID = Run->GetRunID();//Number of run
-  // set.noCol = Variables->NbOfCaloColumns;
-  // set.noRow = Variables->NbOfCaloRows;
-  // settree->Fill();
-	
-  // This method is called at the end of every run.
-  //	dosave();
-  //	if (rootfile) rootfile->Close();
-	
-  // Those two lines were at the desctructor of class, I comment the first since looks it is repeated
-  //    rootfile->Close();
-  //    delete rootfile;
-  */
   time_t END = time(0);
   char bufferEN[100];
   strftime((char*)&bufferEN,100,"%Y-%m-%d - %H-%M-%S",localtime(&END));
@@ -215,11 +142,13 @@ void HodoAnalysis::BeginOfEventAction(const G4Event *anEvent)
   vPDG.clear();
   vLevel.clear();
 
-  vPadPosition.clear();
+  vPaddle.clear();
   vXbar.clear();
   vYbar.clear();
   vZbar.clear();
-  
+  vTbar.clear();
+  vTrackID.clear();
+    
   //  G4cout<<"<HodoAnalysis::BeginOfEventAction>: Leaving..."<<G4endl;
 }
 
@@ -234,136 +163,31 @@ void HodoAnalysis::EndOfEventAction(const G4Event* anEvent)
     //    G4cout<<"<HodoAnalysis::EndOfEventAction>: Begin"<<G4endl;
   }
 
-  // In time I used this approach to the analysis, in this method
-  // was set the variables to be stored.
+  auto eventID = anEvent->GetEventID();
 
-  
+ fHistoManager->SetPadID( vPadNum );
+ fHistoManager->SetEDepTot(vEneDep );
+ fHistoManager->SetPDG( vPDG );
+ fHistoManager->SetLevel( vLevel );
 
-  // this is the code to store by bar
-  // for (G4int ii = 0; ii< 3; ii++)
-  //   {
-  //     for (G4int jj = 0; jj< 2; jj++)
-  // 	{
-  // 	  for (G4int kk = 0; kk< 11; kk++)
-  // 	    {
-  // 	      if(CopyNumberBar[ii][jj][kk] != -1)
-  // 		{
-  // 		  vEneDep.push_back(EnergyAbsBar[ii][jj][kk]);
-  // 		  vPadNum.push_back(CopyNumberBar[ii][jj][kk]);
-		  
-  // 		  G4cout << "storing: " << CopyNumberBar[ii][jj][kk] <<G4endl;	  
-  // 		}
-  // 	    }
-  // 	}
-  //   }
-  //  G4cout << "size storing: " << vEneDep.size() <<G4endl;	  
-      
-    // Counter();//call the couter for screen output (better at the end of event)
-    
-    // //Once an event is finished, HERE is where the data is manipuled to be stored
-    
-    // //accumulates statistic
-    // //
-
-    // //In the original, was called through a handle, here is only an internal method
-    
-    // //    G4cout<<"HodoAnalysis::EndOfEventAction:EnergyAbs: "<<EnergyAbs<<G4endl;
-    // //    G4cout<<"HodoAnalysis::EndOfEventAction:EnergyGap: "<<EnergyGap<<G4endl;
-
-
-    // fillPerEvent(EnergyAbs, EnergyGap, TrackLAbs, TrackLGap);
-    
-    
-    // //print per event (modulo n)
-    // //
-    // G4int evtNb = anEvent->GetEventID();
-
-    // //  if (evtNb%printModulo == 0)//this sentence doesn't work, at least with this modulo
-    
-    // // std::setw(7) is a format command for the following sentence
-    // if(Variables->Verbose == 1)
-    // 	/home/ayerbe/Downloads/WhatsApp Chat with Marie Boer.zip
-    // {
-    // G4cout<<"***********************"<<G4endl;
-    // G4cout<<"HodoAnalysis"<<G4endl;
-    // G4cout << "---> End of event: " << evtNb << G4endl;	
-    // G4cout<<"***********************"<<G4endl;
-	
-    // G4cout
-    // << "   Absorber: total energy: " << std::setw(7)
-    // << G4BestUnit(EnergyAbs,"Energy")
-    // << "       total track length: " << std::setw(7)
-    // << G4BestUnit(TrackLAbs,"Length")
-    // << G4endl
-    // << "        Gap: total energy: " << std::setw(7)
-    // << G4BestUnit(EnergyGap,"Energy")
-    // << "       total track length: " << std::setw(7)
-    // << G4BestUnit(TrackLGap,"Length")
-    // << G4endl;
-	
-    // }    
-    
-    // hit.EventID = Run->GetNumberOfEvent();//Number of event. It gives the index for the storing data   
-    // hit.EventID = evtNb;//Number of event. It gives the index for the storing data   
-    
-    // for (G4int i=0; i<NoMaxModules;i++)
-    // {
-    // if (EnergyGapMod[i]>0.)
-    // {
-    // hit.Module = i;
-    // //	    G4cout<<"i:"<<i<<G4endl;
-    // hit.EDepMod = EnergyGapMod[i]/MeV;//the energy deposited in the scintillator of the module
-
-    // EnergyTemp = EnergyTemp + EnergyGapMod[i]/MeV;//summing all energies in all scint (it is derived to event.EDepTot
-
-    // hit.EDep = EnergyGapMod[i]/MeV + EnergyAbsMod[i]/MeV;
  
-    // if(Variables->Verbose == 1)
-    // {
-    // G4cout<<"EnergyGapMod["<<i<<"]: "<< EnergyGapMod[i] *MeV<<" MeV"<<G4endl;
-    // }	
-    // }
+ fHistoManager->SetPadPosition( vPaddle );
+ fHistoManager->SetXbar(vXbar );
+ fHistoManager->SetYbar(vYbar );
+ fHistoManager->SetZbar(vZbar );
+ fHistoManager->SetTbar(vTbar ); //time
+ fHistoManager->SetTrackID( vTrackID );
 
-	
-    // for (G4int j=0; j<20;j++)
-    // {
-    // if (EnergyGapModLay[i][j]>0.)
-    // {
-    // hit.Layer = j;
-    // hit.EDepLay = EnergyGapModLay[i][j]/MeV;
-    // //		G4cout<<"EnergyGapModLay["<<i<<","<<j<<"]: "<< EnergyGapModLay[i][j] *MeV<<" MeV"<<G4endl;
-    // }
-    // } 
-	 
-    // //there are events where particles leave 0 energy
-    // //with our conditions, such event is not stored, but the index is increased
-    // //perhaps this condition could be relaxed in other way
-
-    // if (EnergyGapMod[i]>0. && (hit.Module>-1))
-    // {
-    // //	    G4cout<<"fill i:"<<i<<G4endl;
-    // hittree->Fill();	
-    // }
-    // }
-
-    // // event.EventID = evtNb;//Number of event. It gives the index for the storing data   
-    // // event.EDepTot = EnergyTemp;
-
-    // // event.PosCal[0]=Position.x();
-    // // event.PosCal[1]=Position.y();
-    // // event.PosCal[2]=Position.z();
-   
-    // // eventtree->Fill();
-
-    
-
+ // Sure, it can be a simple method. Keeping separetely helps maintenance
+ fHistoManager->FillHodoEnergy(eventID);
+ fHistoManager->FillHodoPosition(eventID);
+ 
+ 
   return; //is necesary??
 }
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
-
-
 
 
 
@@ -418,7 +242,7 @@ HodoAnalysis::StepAnalysis(const G4Step *aStep)
 
   
   // collect energy and track length step by step
-  G4double edep = aStep->GetTotalEnergyDeposit();
+ 
 
   
   // Control of localization
@@ -454,162 +278,63 @@ HodoAnalysis::StepAnalysis(const G4Step *aStep)
   G4int ParticleLevel = actualTrack-> GetTrackID();
 
   //  G4cout<<"PDG: "<<PDGID<<" mother/daughter: "<< ParticleLevel<<G4endl;
-  //  G4cout << "pre copy number(tuple function): " <<pre_copyNumber<<" "<< wall<<" "<<layer<<" "<<bar<<G4endl;
-
-
+  // G4cout << "pre copy number(tuple function): " <<pre_copyNumber<<" "<< wall<<" "<<layer<<" "<<bar<<G4endl;
 
   
   if(ActualVolume == "Bar_phy")
     {
-      //      G4cout << "adep "<<edep<<G4endl;
-      EnergyAbs+= edep;
+      G4double edep = aStep->GetTotalEnergyDeposit();
+      G4cout << "adep "<<edep<<G4endl;
+      //     EnergyAbs+= edep;
       
       EnergyAbsBar[wall][layer][bar] += edep;
       CopyNumberBar[wall][layer][bar] = pre_copyNumber;
       
       // G4cout << "acummulated edep: "<< EnergyAbsBar[wall][layer][bar] <<G4endl;
-      // G4cout << "pre copy number: " << CopyNumberBar[wall][layer][bar] <<G4endl;
+      //G4cout << "pre copy number: " << CopyNumberBar[wall][layer][bar] <<G4endl;
 
       vEneDep.push_back(edep);
-      vPadNum.push_back(post_copyNumber);
+      vPadNum.push_back(pre_copyNumber);
       vPDG.push_back(PDGID);
       vLevel.push_back(ParticleLevel);// if it is primary or secondary
             
     }
 
+  
   // This condition warrants that we are in the World and there is no crash with
   // Exit/Entry condition when particle goes OutOfWorld
   if ( actualTrack->GetNextVolume())
     {
       // This cross check when enter into the bar
+      // but it doesn't prevent backward particles
       bool BarEntrance = (Exit(actualTrack, "SciWall")&& Entry(actualTrack, "Bar_phy"));
       //   G4cout<<"BarEntrance: "<< BarEntrance<< G4endl;
       
       if(BarEntrance)
 	{
+
 	  //  G4cout << "11"<<G4endl;
 	  G4ThreeVector Position = actualTrack->GetPosition();
-	  vPadPosition.push_back(post_copyNumber);
+	  // THIS IS SOMETHING TO CHECK, PRE OR POST?
+	  vPaddle.push_back(post_copyNumber);
 	  vXbar.push_back(Position.x());
 	  vYbar.push_back(Position.y());
 	  vZbar.push_back(Position.z());
-	  //	  G4cout<<"Position at Hodo: "<<Position/cm<<G4endl;
+	  vTbar.push_back(pre_point->GetGlobalTime());
+
+	  vTrackID.push_back(ParticleLevel);// if it is primary or secondary
+
+	  
+	  G4cout<<"time at the bar (post): "<< post_point->GetGlobalTime()<<G4endl;
+	  G4cout<<"Position at Hodo: "<<Position.mag()/cm<<G4endl;
+	  G4cout<<"particle: "<<actualTrack->GetDefinition()->GetParticleName() <<G4endl;
 	}
     }
+
+
   
-  //  G4double stepl = 0.;
-
-//   if (aStep->GetTrack()->GetDefinition()->GetPDGCharge() != 0.)
-//     stepl = aStep->GetStepLength();
-
-//   //*********************************************************************************
-//   //***** This part of the code gets the number of the object (module, and layer)****
-//   //*********************************************************************************
-
-//   // First define the handle point1
-//   G4StepPoint* point1 = aStep->GetPreStepPoint();
+  return; //maybe not needed
   
-//   // From it, define the handle of the touchable
-//   G4TouchableHandle touch1 = point1->GetTouchableHandle();
-  
-//   // We can get the volume
-//   G4VPhysicalVolume* volume = touch1->GetVolume();
-  
-//   //from this volume, the name
-//   G4String name = volume->GetName();
-//   G4cout << "touch name: "<<name<<G4endl;
-//   // the copy number of the touchable (no from the volume)
-//   //    G4int copyNumber = touch1->GetCopyNumber();
-  
-//   //from the touchable, the mother volume
-//   //    G4VPhysicalVolume* mother = touch1->GetVolume(1);
-
-//   //and the Copy Number 1:layer 2:module
-
-//   // G4int copyNumberLayer = touch1->GetCopyNumber(1);
-//   // G4cout << "00"<<G4endl;
-//   // G4int copyNumberModule = touch1->GetCopyNumber(2);
-
-
-//   G4int copyNumberBar = touch1->GetCopyNumber(0);
-//   //    G4cout<<"Module: "<<copyNumberModule<<G4endl;
-//   //    G4cout<<"Layer: "<<copyNumberLayer<<G4endl;
-
-//   //********************************************
-//   //*** End of code*****************************
-//   //********************************************
-
-//   // Get the real position of the particle when reach the calorimeter
-//   // if((actualTrack->GetVolume()->GetName()=="Calorimeter") &&
-//   //    (actualTrack->GetNextVolume()->GetName()=="CaloModul"||
-//   // 	actualTrack->GetNextVolume()->GetName()=="Layer"||
-//   // 	actualTrack->GetNextVolume()->GetName()=="Gap"||
-//   // 	actualTrack->GetNextVolume()->GetName()=="Absorber")
-//   // 	)
-  
-//  G4cout << "10"<<G4endl;
-
-//  // G4double  EnergyAbs;
-//  //  G4double  EnergyAbsMod[NoMaxModules];
-
- 
-//   //this obtains the position of the particle when reaches the calorimeter
-//  if(Entry(actualTrack, "SciWall")&& Exit(actualTrack, "World"))
-//     {
-//       G4cout << "11"<<G4endl;
-//       G4ThreeVector Position = actualTrack->GetPosition();
-//       //	G4cout<<"Position at Hodo: "<<Position/cm<<G4endl;
-//     }
-    
-//   if(actualTrack->GetVolume()->GetName()=="Bar_phy")
-//     {
-//       G4cout << "12 "<<edep<<G4endl;
-//       EnergyAbs+= edep;
-//       G4cout << "121 "<< EnergyAbs <<G4endl;
-//       //      EnergyAbsMod[copyNumberBar] += edep;
-//       G4cout << "122 "<<copyNumberBar<<G4endl;
-//       //    TrackLAbs += stepl;
-//     }
-
-//   G4cout << "13"<<G4endl;
-//   // Gap=Scintillator, the only energy we can read
-//   // if(actualTrack->GetVolume()->GetName()=="Gap")
-//   //   {
-//   //     EnergyGap+= edep;
-//   //     EnergyGapMod[copyNumberModule] += edep;
-//   //     EnergyGapModLay[copyNumberModule][copyNumberLayer] += edep;
-//   //     TrackLGap += stepl;
-//   //   }
-
-//   //*****************************************************************
-//   // if we are not interested in background and leaving the hall,
-//   // we stop tracking
-    
-//   if (actualTrack->GetVolume()->GetName()=="SciWall" &&
-//       actualTrack->GetNextVolume()->GetName()=="World")
-//     {
-//       G4cout << "15"<<G4endl;
-//       //	if(Variables->Verbose == 1)
-//       {
-// 	G4cout << "<HodoAnalysis::StepAceptance> : particle leaves hall...: "
-// 	       << NextVolume
-// 	       << G4endl;
-//       }
-//       actualTrack->SetTrackStatus(fStopAndKill);
-//     } // Particle is killed so can be proceed with other event
-    
-//   //    G4cout<<"StepAceptance:EnergyAbs: "<<EnergyAbs *MeV<<G4endl;
-//   //    G4cout<<"StepAceptance:EnergyGap: "<<EnergyGap *MeV<<G4endl;
-    
-
-//   //    if(Variables->Verbose == 1)
-//   {
-//     G4cout <<"<HodoAnalysis::StepAceptance>: done" << G4endl;
-//   }
-
-//   // SHould I return??? Perhaps without returning, the object is not deleted
-//   //   return;
-//
 }
 
 

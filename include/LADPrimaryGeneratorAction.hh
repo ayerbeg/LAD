@@ -41,6 +41,9 @@ private:
   G4double WallCentAng;
   G4ThreeVector RealMomentumDir;
 
+
+ G4int RadStepCounter;
+  
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

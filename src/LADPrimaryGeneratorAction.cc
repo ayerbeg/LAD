@@ -41,7 +41,11 @@ LADPrimaryGeneratorAction::LADPrimaryGeneratorAction()
   // G4cout<<"*************************************************************"<<G4endl;
   // G4cout<<"Particle direction: "<<PartMon.z()<<" angle: "<<ang/deg<<G4endl;
   
-  fParticleGun->SetParticleEnergy(300.*MeV);
+    fParticleGun->SetParticleEnergy(300.*MeV);
+  // fParticleGun->SetParticleMomentum(300.*MeV);
+
+    RadStepCounter=0;
+    
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -166,9 +170,58 @@ void LADPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       }
 
     case 1:
-      
+      {
+	G4cout<<"GenerateRaster"<<G4endl;
+	// This function is called at the begining of event. A full coverage will need 36*25 (36*24) events. 
+
+
+
+	G4double EventStep    = anEvent ->GetEventID();          // The ONLY counter we can use.
+	G4double EventAngStep = anEvent->GetEventID()%36 ;// The circle is divided in 36 parts, 10deg each.
+	//	G4double EventRadStep = (anEvent->GetEventID())% 25 ;// The circle is divided in 36 parts, 10deg each.
+
+	cout<<"EventStep: "<<EventStep<<" EventAngStep: "<<EventAngStep<<G4endl;
+
+	
+	if(EventAngStep == 0 || anEvent->GetEventID() == 0)
+	  {
+
+	    RadStepCounter ++;
+	    
+	    if(RadStepCounter == 25) RadStepCounter = 0; // Including rad=0, needs more code, if not we will have 36 events at (0,0)
+	  }
+
+	cout<<" RadStepCounter: "<<RadStepCounter<<G4endl;
+
+	
+	// We move from external circle inwards
+	G4double Ang = 10*deg *EventAngStep ;//Angle
+	G4double Rad = 25*mm - (1*mm* RadStepCounter);//Radius
+  
+	G4double Xpos = Rad * cos(Ang);
+	G4double Ypos = Rad * sin(Ang);
+
+	cout<<"Ang: "<<Ang/deg<<" Rad: "<<Rad<<" Xpos: "<<Xpos<<" Ypos: "<<Ypos<<G4endl;
+	  
+  
+	fParticleGun -> SetParticlePosition( G4ThreeVector(Xpos, Ypos, 0) ); //position/origin of the beam (there was a typo)
+	fParticleGun -> SetParticleMomentumDirection( G4ThreeVector(0. ,0., 1) ); //Z-direction of the beam
+
+	G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("e-"); // Corrected! Use different way
+	//  G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("gamma"); // Corrected! Use different way
+	fParticleGun->SetParticleDefinition(particle);
+	fParticleGun->SetParticleMomentum(6.*MeV);
+  
+	//	fParticleGun->GeneratePrimaryVertex(anEvent);
+ 
+
+
+	G4cout<<"Particle: " <<fParticleGun->GetParticleDefinition()->GetParticleName()<<G4endl;
+	G4cout<<"Momentum: " <<fParticleGun->GetParticleMomentum()<<G4endl;
+	G4cout<<"Energy: "   <<fParticleGun->GetParticleEnergy()<<G4endl;
+	G4cout<<"Position: " <<fParticleGun->GetParticlePosition()<<G4endl;
       break;
-      
+      }
     
     default:
       {
@@ -185,6 +238,11 @@ void LADPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 	MomentumDir.setZ( cos(Angle_scan*deg) );
 
 	fParticleGun->SetParticleMomentumDirection(MomentumDir);
+
+	G4cout<<"Particle: "<<fParticleGun->GetParticleDefinition()->GetParticleName()<<G4endl;
+	G4cout<<"Momentum: "<<fParticleGun->GetParticleMomentum()<<G4endl;
+	G4cout<<"Energy: "  <<fParticleGun->GetParticleEnergy()<<G4endl;
+	
 	break;
       }
     }

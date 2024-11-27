@@ -66,7 +66,7 @@ G4VPhysicalVolume* LADDetectorConstruction::DefineVolumes()
   auto worldLV
     = new G4LogicalVolume(
                  worldS,           // its solid
-                 Materials->defaultMaterial,  // its material
+                 Materials->defaultMaterial,  // vacuum
                  "World");         // its name
 
   auto worldPV = new G4PVPlacement(nullptr,  // no rotation

@@ -12,6 +12,49 @@
 #include "Randomize.hh"
 #include <iomanip>
 
+
+
+// Don't ask!! no clue how this piece of code works.
+// I would like to modify it to make it more readable
+// I understand it is the getter for the GEMs hitcollection
+// but not sure
+
+namespace {
+
+// Utility function which finds a hit collection with the given Id
+// and print warnings if not found
+G4VHitsCollection* GetHC(const G4Event* event, G4int collId) {
+  auto hce = event->GetHCofThisEvent();
+  if (!hce) {
+      G4ExceptionDescription msg;
+      msg << "No hits collection of this event found." << G4endl;
+      G4Exception("EventAction::EndOfEventAction()",
+                  "Code001", JustWarning, msg);
+      return nullptr;
+  }
+
+  auto hc = hce->GetHC(collId);
+  if ( ! hc) {
+    G4ExceptionDescription msg;
+    msg << "Hits collection " << collId << " of this event not found." << G4endl;
+    G4Exception("EventAction::EndOfEventAction()",
+                "Code001", JustWarning, msg);
+  }
+  return hc;
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 LADEventAction::LADEventAction(LADRunAction* RunAction, HistoManager* histo, HodoAnalysis* HodoHandle)
@@ -68,23 +111,7 @@ LADEventAction::GetHitsCollection(G4int hcID,
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void LADEventAction::PrintEventStatistics(G4double absoEdep) const
-			      // 		  , G4double absoTrackLength,
-                              // G4double gapEdep, G4double gapTrackLength) const
-{
-  // print event statistics
-  G4cout
-     << "   Absorber: total energy: " 
-     << std::setw(7) << G4BestUnit(absoEdep, "Energy")
-     // << "       total track length: " 
-     // << std::setw(7) << G4BestUnit(absoTrackLength, "Length")
-     // << G4endl
-     // << "        Gap: total energy: " 
-     // << std::setw(7) << G4BestUnit(gapEdep, "Energy")
-     // << "       total track length: " 
-     // << std::setw(7) << G4BestUnit(gapTrackLength, "Length")
-     << G4endl;
-}
+
 */
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -92,17 +119,32 @@ void LADEventAction::BeginOfEventAction(const G4Event* event)
 {
   // G4cout<<"LADEventAction::BeginOfEventAction ---- START"<<G4endl;
 
-  // G4cout<<"LADEventAction::BoE "<< event -> GetEventID() <<G4endl;
+  
+  EventID = event -> GetEventID();  
+ 
 
- EventID = event -> GetEventID();  
- // G4cout<<"LADEventAction::BoE "<< EventID <<G4endl;
+ // vEnergyDep.clear();
+ // vPadNumber.clear();
 
- vEnergyDep.clear();
- vPadNumber.clear();
 
 
  // G4cout<<"LADEventAction::BoE GOING TO ANALYSIS "<< G4endl;
  AnalysisHodo->BeginOfEventAction(event);
+
+
+ // GEM Analysis data
+ auto sdManager = G4SDManager::GetSDMpointer();
+
+ // I want to modify these lines in order to have explicit names of the variables
+ array<G4String, kDim> dHCName
+      = {{ "chamber1/LADGEMHitsCollection", "chamber2/LADGEMHitsCollection" }};
+ 
+ for (G4int iDet = 0; iDet < kDim; ++iDet)
+   {
+    fGEMHCID[iDet] = sdManager->GetCollectionID(dHCName[iDet]);
+   }
+
+   
 }
 
 
@@ -112,93 +154,69 @@ void LADEventAction::EndOfEventAction(const G4Event* event)
 {
   G4cout<<"LADEventAction::EndOfEventAction ****"<<G4endl;
   auto eventID = event->GetEventID();
-// I accumulated all the hits on each paddle sent to this class
-// and then it is stored in the HistoManager
-
-
-// This storage method is temporary until I fix the HodoAnalysis
-
-
 
   
-/*
 
- // Get hits collections IDs (only once)
-  if ( fAbsHCID == -1 ) {
-    fAbsHCID 
-      = G4SDManager::GetSDMpointer()->GetCollectionID("barSD/LADbarsHitsCollection");
-    // fGapHCID 
-    //   = G4SDManager::GetSDMpointer()->GetCollectionID("GapHitsCollection");
-  }
-
-  G4cout<<"LADEventAction::EndOfEventAction fAbsHCID: "<<fAbsHCID<<G4endl;
-
-  // Get hits collections
-  auto absoHC = GetHitsCollection(fAbsHCID, event);
-  //  auto gapHC = GetHitsCollection(fGapHCID, event);
-
-  // Get hit with total values
-  auto absoHit = (*absoHC)[absoHC->entries()-1];
-  //  auto gapHit = (*gapHC)[gapHC->entries()-1];
- */
-  // Print per event (modulo n)
-  //
- // auto eventID = event->GetEventID();
   auto printModulo = G4RunManager::GetRunManager()->GetPrintProgress();
   if ( ( printModulo > 0 ) && ( eventID % printModulo == 0 ) ) {
     G4cout << "---> End of event: " << eventID << G4endl;     
     
-    
-    //    PrintEventStatistics(
-			 // absoHit->GetEdep(), absoHit->GetTrackLength(),
-			 //     gapHit->GetEdep(), gapHit->GetTrackLength());
   }  
-  
+
+  // The Hodoscope data is handled in the HodoAnalysis 
   // G4cout<<"LADEventAction::EoE GOING TO ANALYSIS "<< G4endl;
- AnalysisHodo->EndOfEventAction(event);
-
- // Delete them, copying a vector twice... bad memory handle
- // vEnergyDep = AnalysisHodo-> GetEneDep();
- // vPadNumber = AnalysisHodo -> GetPad();
+  AnalysisHodo->EndOfEventAction(event);
 
 
 
- // I could have these lines in the Analysis code and save steps
- // for the time being let's keep them here
+ // Here is where we can extract the information of the GEMs
+ // I will try make vectors.
  
- fHistoManager->SetPadID(AnalysisHodo  -> GetPad() );
- fHistoManager->SetEDepTot(AnalysisHodo-> GetEneDep() );
-
- fHistoManager->SetPDG(AnalysisHodo    -> GetPDG() );
- fHistoManager->SetLevel(AnalysisHodo  -> GetLevel() );
-
- 
- fHistoManager->SetPadPosition(AnalysisHodo -> GetPadPosition() );
- fHistoManager->SetXbar(AnalysisHodo  -> GetXpos() );
- fHistoManager->SetYbar(AnalysisHodo  -> GetYpos() );
- fHistoManager->SetZbar(AnalysisHodo  -> GetZpos() );
-
-
-   
- fHistoManager->FillTest(eventID);
- 
- 
- for (G4int kk = 0; kk < vPadNumber.size() ; kk++)
+ for (G4int iDet = 0; iDet < kDim; ++iDet)
    {
+     auto hc = GetHC(event, fGEMHCID[iDet]);
+     if ( ! hc ) return;
      
-     //     G4cout << "storing in Event: " <<vPadNumber[kk] <<G4endl;	  
+     auto nhit = hc->GetSize();
+     
+     for (unsigned long i = 0; i < nhit; ++i)
+       {
+	 LADGEMHit *hit = static_cast<LADGEMHit*>(hc->GetHit(i));
+	 G4ThreeVector localPos = hit->GetLocalPos();
+	 G4ThreeVector worldPos = hit->GetWorldPos();
+
+	 G4cout<<"Getting data: "<<localPos.x()<<", "<< localPos.y()<<", "<< hit->GetLevel()<<", "<<iDet<<G4endl;
+	 fHistoManager -> AddXloc(localPos.x());
+	 fHistoManager -> AddYloc(localPos.y());
+	 fHistoManager -> AddZloc(localPos.z());
+
+	 fHistoManager -> AddXglo(worldPos.x());
+	 fHistoManager -> AddYglo(worldPos.y());
+	 fHistoManager -> AddZglo(worldPos.z());
+
+
+	 fHistoManager -> AddTchamber(hit -> GetTime());//time
+	 fHistoManager -> AddgLevel(hit -> GetLevel() );
+	 fHistoManager -> AddChamber(iDet);
+	 fHistoManager -> AddgPDG( hit -> GetPDG() );
+
+	 
+       }
    }
  
+
+ 
+fHistoManager -> FillGEM(eventID);
  
 }  
 
 
-void LADEventAction::FillEvent(G4int copy, G4double ene)
-{
-// Just filling the vectors with information from SteppingAction
+// void LADEventAction::FillEvent(G4int copy, G4double ene)
+// {
+// // Just filling the vectors with information from SteppingAction
 
-  vEnergyDep.push_back(ene);
-  vPadNumber.push_back(copy);
-}
+//   vEnergyDep.push_back(ene);
+//   vPadNumber.push_back(copy);
+// }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

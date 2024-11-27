@@ -51,6 +51,7 @@ using namespace CLHEP;
 // #include <iostream>
 // #include <sstream>
 
+#include "HistoManager.hh"
 #include "LADVariables.hh"
 
 #define NoMaxModules 50212 //too big, change to vector
@@ -89,7 +90,7 @@ using namespace std;
 class HodoAnalysis {
   
 public:
-  HodoAnalysis();
+  HodoAnalysis(HistoManager*);
   ~HodoAnalysis();
    
   // Here we clear some counters at the begin of a run.  
@@ -147,7 +148,7 @@ public:
 
 
 
-  vector<G4int>    GetPadPosition()  {return vPadPosition;}
+  vector<G4int>    GetPadPosition()  {return vPaddle;}
   vector<G4double> GetXpos() {return vXbar;}
   vector<G4double> GetYpos() {return vYbar;}
   vector<G4double> GetZpos() {return vZbar;}  
@@ -188,15 +189,16 @@ private:
   vector<G4double> vEneDep;
   vector<G4int>    vPadNum;
   vector<G4int>    vPDG;
-  vector<G4int>    vLevel;
+  vector<G4int>    vLevel;//Level 1 -> primary particle, >1 secundaries
 
 
   // These variables only for position at the bars
-  vector<G4int>    vPadPosition;
+  vector<G4int>    vPaddle;
   vector<G4double> vXbar;
   vector<G4double> vYbar;
   vector<G4double> vZbar;
-  
+  vector<G4double> vTbar; //time
+  vector<G4int>    vTrackID;// similar to vLevel but just for pos-time purposes
 
   G4double EnergyTemp;
 
@@ -251,6 +253,7 @@ private:
     
   TFile *rootfile; // the ROOT file for output
 
+  HistoManager* fHistoManager  = nullptr;
   // G4Run *Run; // pointer to the current Run
 
   //  G4String  FileNameSuffix;	
