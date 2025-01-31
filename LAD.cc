@@ -59,18 +59,18 @@ int main(int argc,char** argv)
     PrintUsage();
     return 1;
   }
+
+  G4cout << "Compiled on: " __DATE__ " " __TIME__ "." << G4endl;
   
   Variables = new LADVariables(); // This object stores all parameters which are read from LAD.ini
   Constants = new LADConstants(); // This object stores all parameters which are fix.
 
- 
-
-   
-  
+    
   G4String dataname;
   dataname = "LAD.ini";
   Variables->LoadFromFile(dataname); // Read the parameters
-
+  G4cout<<"Generator: "<<   Variables->GeneratorCase<<G4endl;
+ 
   
   G4String macro;
   G4String session;
@@ -123,6 +123,7 @@ int main(int argc,char** argv)
 #ifdef G4MULTITHREADED
   if ( nThreads > 0 ) {
     runManager->SetNumberOfThreads(nThreads);
+   
   }
 #endif
 
@@ -199,7 +200,15 @@ int main(int argc,char** argv)
     // (the default in G4TScoreNtupleWriter)
 
 
-  
+  // BE CAREFUL!! THIS WORKS, BUT IS NOT VERY COMMON TO USE IT
+  // This case is for read LUND format file.
+  // The number of events, should be read from the INI file
+  if(Variables->GeneratorCase == 2)
+    {
+      G4cout<<">>>>>>>>>>>>>LUND generator<<<<<<<<<<<"<<G4endl;
+      //     runManager -> BeamOn(2);
+    }
+
   // Process macro or start UI session
   //
 
@@ -238,7 +247,9 @@ int main(int argc,char** argv)
 	  delete ui;
 	}
     }
+     
 
+  
 
   // Job termination
   // Free the store: user actions, physics_list and detector_description are

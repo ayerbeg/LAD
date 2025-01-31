@@ -103,6 +103,9 @@ LADVariables::LoadFromFile(G4String FileName)
 
 				READINT(GeneratorCase);//particle generator case
 
+				READSTRING(ScanParticle);
+				READDOUBLE(ScanMomentumParticle, MeV); 
+				
 			} // if getline
 		} // if not end of file
 		return 0;

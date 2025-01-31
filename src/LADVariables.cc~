@@ -1,0 +1,339 @@
+#include <sstream>
+#include <fstream>
+using namespace std;
+
+#include "KAOSVariablen.hh"
+
+
+#define LESEBOOL(myx) \
+				if (buf == #myx) \
+				{ \
+					ss >> wert; \
+					myx = ReadBoolean(wert); \
+				}
+
+#define LESEDOUBLE(x,unit) \
+				if (buf == #x) \
+				{ \
+					ss >> doublewert; \
+					x = doublewert * unit; \
+				}
+
+#define LESEINT(x) \
+				if (buf == #x) \
+				{ \
+					ss >> intwert; \
+					x = intwert; \
+				}
+
+#define LESESTRING(x) \
+				if (buf == #x) \
+				{ \
+					ss >> x; \
+				}
+
+#define LESEVEKTOR(v) \
+				if (buf == #v) \
+				{ \
+					G4double x,y,z; \
+					if (ss >> x >> y >> z) \
+					v = G4ThreeVector(x * m, y * m, z * m); \
+				}
+
+
+
+KAOSVariablen::KAOSVariablen()
+{
+	G4cout << "<KAOSVariablen::KAOSVariablen>: Wird initialisiert." << G4endl;
+	G4int i;
+	for (i=0;i<MAXANZAHLTEILCHEN;i++)
+	{
+		Reaktionsteilchen[i]="";
+	}
+	mamiEnergie = 1500 * MeV;
+	Strahlwinkel = 0;
+
+	Elektrondetektor = "SpecB";
+	SpecBWinkel = 40 * deg;
+	SpecBImpuls = 300 * MeV;
+
+	Target = "C12";
+
+	UseKolli = false;
+	UseJoch = true;
+	UseDipol = false;
+	UseFibers = true;
+	UseFieldMap = true;
+	
+	Wedeln = false;
+	LongTarget = false;
+	MaxStepLength = 10*m;
+//	LimitStep = false;
+	doDecay = false;
+	doAllBackround = false;
+	doSecondarys = true;
+	doEMPhysics = true;
+	checkTargethit = true;
+	coincOnly = false;
+	FastMode = false;
+	doDrawTracks = false;
+		
+	FEEPosition = G4ThreeVector(-1*m, 0, 3*m);
+	FEELaenge = 1.4 * m;
+	FEEWinkel = 0;
+
+	Detektorabstand = 1.4 * m;
+	Detektorwinkel = 0 *  deg;
+//	JochVerschiebung;
+	Detektorhub = 0;
+	Feldstaerke = 1 * tesla;
+	DetektorTarget = Detektorabstand;
+	
+	SciFiWinkel=60*deg;
+	FEE_OOP=0*mm;
+	
+	ESchritte = 20;
+	xwSchritte = 5;
+	ywSchritte= 5;
+
+	xwWeite=10*deg;
+	ywWeite=0.5*deg;
+		
+	nK = 0;
+	doDraw = false;
+	isInKField = false;
+	GunMode = GM_OTHER;
+
+	char buffer[100];
+	time_t Jetzt = time(0);	
+	strftime((char*)&buffer,100,"%Y-%m-%d-%H-%M-%S",localtime(&Jetzt));
+	FileNameSuffix = buffer;
+	TargetX=0;
+	TargetY=0;
+}
+
+KAOSVariablen::~KAOSVariablen()
+{
+	G4cout << "<KAOSVariablen::~KAOSVariablen>: Terminiert" << G4endl;
+}
+
+G4int 
+KAOSVariablen::LoadFromFile(G4String FileName)
+{
+	ifstream infile;
+	G4String zeile;
+	infile.open(FileName);
+	if (infile)
+	{
+		while (!infile.eof())
+		{
+			if (getline(infile,zeile))
+			{
+				G4String buf;
+				G4String wert;
+				G4double doublewert;
+				G4int intwert;
+				stringstream ss(zeile);
+//				G4cout << ">" << zeile << G4endl;
+				ss >> buf;
+//				G4cout << ">" << ss.str() << "<" << G4endl;
+
+				LESEDOUBLE(mamiEnergie,MeV);
+			
+				LESEDOUBLE(C_ang,deg);
+				LESEDOUBLE(KAOS_ang,deg);
+
+				LESEDOUBLE(Strahlwinkel,deg);
+				
+				LESESTRING(Elektrondetektor);
+				LESEDOUBLE(SpecBWinkel,deg);
+				LESEDOUBLE(SpecBImpuls,MeV);
+
+				LESEBOOL(ScanAngles);
+				LESEDOUBLE(minAng,deg);
+				LESEDOUBLE(maxAng,deg);
+				LESEINT   (angStep);
+
+				LESEBOOL(Elastic);
+				LESEBOOL(Simple);
+
+				LESEBOOL(ScanEnergy);
+				LESEDOUBLE(minEne,MeV);
+				LESEDOUBLE(maxEne,MeV);
+				LESEINT   (eneStep);
+
+				LESEDOUBLE(DCV,mm);
+				LESEVEKTOR(TARGETPosition);
+
+
+				LESEBOOL(UseJoch);
+				LESEBOOL(UseDipol);
+				LESEBOOL(UseFibers);
+				LESEBOOL(UseFieldMap);
+				LESEBOOL(Wedeln);
+				LESEBOOL(LongTarget);
+				LESEDOUBLE(MaxStepLength,mm);
+//				LESEBOOL(LimitStep);
+				LESEBOOL(doDecay);
+				LESEBOOL(doAllBackround);
+				LESEBOOL(doSecondarys);
+				LESEBOOL(doEMPhysics);
+				LESEBOOL(checkTargethit);
+				LESEBOOL(coincOnly);
+				LESEBOOL(FastMode);
+				LESEBOOL(doDrawTracks);
+				
+				LESESTRING(Target);				
+				LESEDOUBLE(TargetX,mm);				
+				LESEVEKTOR(FEEPosition);
+				LESEDOUBLE(FEEWinkel,1);
+				LESEDOUBLE(FEELaenge,m);
+				LESEDOUBLE(Detektorabstand,m);
+				LESEDOUBLE(Detektorwinkel,deg);
+				LESEDOUBLE(Detektorhub,mm);
+				LESEDOUBLE(Feldstaerke,tesla);
+
+				LESEDOUBLE(SciFiWinkel,deg);
+				LESEDOUBLE(FEE_OOP,mm);
+				LESEINT(ESchritte);
+				LESEINT(xwSchritte);
+				LESEINT(ywSchritte);
+				LESEDOUBLE(xwWeite,deg);
+				LESEDOUBLE(ywWeite,deg);
+			} // if getline
+		} // if not end of file
+		FEERotation.rotateY(FEEWinkel);
+		G4cout << FEEWinkel << " -----> " << G4endl;
+		DetektorTarget=Detektorabstand;
+		Detektorabstand=DetektorTarget*cos(Strahlwinkel);
+		if (Strahlwinkel!=0) TargetX=-DetektorTarget*sin(Strahlwinkel);
+		return 0;
+	} // if infile
+	else
+	{
+		G4cerr << "Konnte Datei nicht zum lesen öffnen!" << G4endl;
+		return -1;
+	} // if infile else
+}
+
+
+G4int 
+KAOSVariablen::SaveToFile(G4String FileName)
+{
+	ofstream outfile;
+	outfile.open(FileName);
+	if (outfile)
+	{
+		outfile << *this;
+		G4cout << "Folgendes wurde ins File geschrieben:" << G4endl << *this;
+		outfile.close();
+		return 0;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+ostream & operator << (ostream & os, const KAOSVariablen v) {
+	return os 
+		<< "mamiEnergie " << v.mamiEnergie / MeV << endl
+		<< "Strahlwinkel " << v.Strahlwinkel / deg << endl
+		<< "Elektrondetektor " << v.Elektrondetektor << endl
+		<< "SpecBWinkel " << v.SpecBWinkel / deg << endl
+		<< "SpecBImpuls " << v.SpecBImpuls / MeV << endl
+		<< "Target " << v.Target << endl
+		<< "TargetX " << v.TargetX/mm << endl
+		<< "TargetY " << v.TargetY/mm << endl
+		<< "UseJoch " << v.UseJoch << endl
+		<< "UseDipol " << v.UseDipol << endl
+		<< "UseFibers " << v.UseFibers << endl
+		<< "UseFieldMap " << v.UseFieldMap << endl
+		<< "Wedeln " << v.Wedeln << endl
+		<< "LongTarget " << v.LongTarget << endl
+		<< "MaxStepLength " << v.MaxStepLength << endl
+//		<< "LimitStep " << v.LimitStep << endl
+		<< "doDecay " << v.doDecay << endl
+		<< "doAllBackround " << v.doAllBackround << endl
+		<< "doSecondarys " << v.doSecondarys << endl
+		<< "doEMPhysics " << v.doEMPhysics << endl
+		<< "checkTargethit " << v.checkTargethit << endl
+		<< "coincOnly " << v.coincOnly << endl
+		<< "FastMode " << v.FastMode << endl
+		<< "doDrawTracks " << v.doDrawTracks << endl
+		<< "FEEWinkel " << v.FEEWinkel << endl
+		<< "FEEPosition " << v.FEEPosition.x() / m << " "
+		<< v.FEEPosition.y() / m <<  " " << v.FEEPosition.z() / m << endl
+		<< "FEELaenge " << v.FEELaenge / m << endl
+		<< "Detektorabstand " << v.Detektorabstand / m << endl
+		<< "Detektorwinkel " << v.Detektorwinkel / deg << endl
+		<< "Detektorhub " << v.Detektorhub / mm << endl
+		<< "Feldstaerke " << v.Feldstaerke / tesla << endl
+		<< "SciFiWinkel " << v.SciFiWinkel / deg << endl
+		<< "FEE_OOP " << v.FEE_OOP / mm << endl
+		<< "ESchritte " << v.ESchritte << endl
+		<< "xwSchritte " << v.xwSchritte << endl
+		<< "ywSchritte " << v.ywSchritte << endl
+		<< "xwWeite " << v.xwWeite / deg << endl
+		<< "ywWeite " << v.xwWeite / deg << endl
+;
+}
+
+ostream & operator << (ostream & os, const KAOSVariablen *v) {
+	return os 
+		<< "mamiEnergie " << v->mamiEnergie / MeV << endl
+		<< "Strahlwinkel " << v->Strahlwinkel / deg << endl
+		<< "Elektrondetektor " << v->Elektrondetektor << endl
+		<< "SpecBWinkel " << v->SpecBWinkel / deg << endl
+		<< "SpecBImpuls " << v->SpecBImpuls / MeV << endl
+		<< "Target " << v->Target << endl
+		<< "TargetX " << v->TargetX/mm << endl
+		<< "TargetY " << v->TargetY/mm << endl
+		<< "UseKolli " << v->UseKolli << endl
+		<< "UseJoch " << v->UseJoch << endl
+		<< "UseDipol " << v->UseDipol << endl
+		<< "UseFibers " << v->UseFibers << endl
+		<< "UseFieldMap " << v->UseFieldMap << endl
+		<< "Wedeln " << v->Wedeln << endl
+		<< "LongTarget " << v->LongTarget << endl
+		<< "MaxStepLength " << v->MaxStepLength << endl
+//		<< "LimitStep " << v->LimitStep << endl
+		<< "doDecay " << v->doDecay << endl
+		<< "doAllBackround " << v->doAllBackround << endl
+		<< "doSecondarys " << v->doSecondarys << endl
+		<< "doEMPhysics " << v->doEMPhysics << endl
+		<< "checkTargethit " << v->checkTargethit << endl
+		<< "coincOnly " << v->coincOnly << endl
+		<< "FastMode " << v->FastMode << endl
+		<< "doDrawTracks " << v->doDrawTracks << endl
+		<< "FEEWinkel " << v->FEEWinkel << endl
+		<< "FEEPosition " << v->FEEPosition.x() / m << " "
+		<< v->FEEPosition.y() / m <<  " " << v->FEEPosition.z() / m << endl
+		<< "FEELaenge " << v->FEELaenge / m << endl
+		<< "Detektorabstand " << v->Detektorabstand / m << endl
+		<< "Detektorwinkel " << v->Detektorwinkel / deg << endl
+		<< "Detektorhub " << v->Detektorhub / mm << endl
+		<< "Feldstaerke " << v->Feldstaerke / tesla << endl
+		<< "FEE_OOP " << v->FEE_OOP / mm << endl
+		<< "ESchritte " << v->ESchritte << endl
+		<< "xwSchritte " << v->xwSchritte << endl
+		<< "ywSchritte " << v->ywSchritte << endl
+		<< "xwWeite " << v->xwWeite / deg << endl
+		<< "ywWeite " << v->xwWeite / deg << endl
+;
+}
+
+
+G4bool
+KAOSVariablen::ReadBoolean(G4String Value)
+{
+	if ((Value=="true")
+		|| (Value=="True")
+		|| (Value=="1"))
+	{return true;}
+	else
+	{return false;}
+}
+
+
+KAOSVariablen *Variablen=NULL;

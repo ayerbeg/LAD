@@ -8,8 +8,12 @@
 #include "LADVariables.hh"
 #include "LADConstants.hh"
 
+#include "LADRunAction.hh"
+
+
 class G4ParticleGun;
 class G4Event;
+class LADRunAction; // it carries the pointer LundRead
 
 /// The primary generator action class with particle gum.
 ///
@@ -26,6 +30,12 @@ public:
 
   void GeneratePrimaries(G4Event* event) override;
   G4ThreeVector orthovector(G4ThreeVector dir_vec);
+
+  void ScanLAD(G4Event*);
+  void Raster(G4Event* event);
+  void LUND(G4Event* event);
+
+  
 private:
   G4ParticleGun* fParticleGun = nullptr; // G4 particle gun
 
@@ -40,6 +50,10 @@ private:
   G4double WallDist;
   G4double WallCentAng;
   G4ThreeVector RealMomentumDir;
+
+  // not needed for the moment
+  G4ThreeVector ParticlePosition;
+
 
 
  G4int RadStepCounter;
