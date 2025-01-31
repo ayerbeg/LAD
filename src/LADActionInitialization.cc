@@ -47,6 +47,14 @@ void LADActionInitialization::Build() const
   HodoAnalysis *
     HodoHandler = new HodoAnalysis(histo);
  
+
+
+  if(Variables->GeneratorCase == 2)
+    {
+      G4cout<<">>>>>>>>>>>>>LUND generator<<<<<<<<<<<  "<<Variables->GeneratorCase<<G4endl;
+      LundRead = new LADLUNDReader();
+      
+    } 
   
   // Actions
   // I am using old way to declare the actions instead of using 'auto'

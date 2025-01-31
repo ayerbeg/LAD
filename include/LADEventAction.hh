@@ -5,6 +5,8 @@
 #include "LADRunAction.hh"
 //#include "LADHodoHit.hh"
 #include <vector>
+#include "LADVariables.hh"
+//#include "LADLUNDReader.hh"
 
 #include "globals.hh"
 
@@ -55,8 +57,8 @@ private:
   // LADHodoHitsCollection* GetHitsCollection(G4int hcID,
   //                                           const G4Event* event) const;
   void PrintEventStatistics(G4double absoEdep) const;
-    // , G4double absoTrackLength,
-    //                         G4double gapEdep, G4double gapTrackLength) const;
+  // , G4double absoTrackLength,
+  //                         G4double gapEdep, G4double gapTrackLength) const;
   
   // data members                   
   G4int  fAbsHCID;
