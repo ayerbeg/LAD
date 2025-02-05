@@ -147,6 +147,7 @@ void LADPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   // no need to set the particle position here, when it could be something particular of the case
   //  fParticleGun -> SetParticlePosition( ParticlePosition );
+<<<<<<< HEAD
 
   
   // I think it is better to invoke the vertex generator on each method
@@ -244,6 +245,81 @@ void LADPrimaryGeneratorAction::ScanLAD(G4Event* anEvent)
   
  
   
+=======
+
+  
+  // I think it is better to invoke the vertex generator on each method
+  // fParticleGun -> GeneratePrimaryVertex(anEvent);
+
+}
+
+
+// I think this method needs some cleaning
+void LADPrimaryGeneratorAction::ScanLAD(G4Event* anEvent)
+{
+  G4cout<<"Generator Scan Case" <<G4endl;
+
+  G4ThreeVector MomentumDir;
+	
+  // we use geantino, because this case is not for physics.
+  particle
+    //  = G4ParticleTable::GetParticleTable()->FindParticle("geantino");
+    = G4ParticleTable::GetParticleTable()->FindParticle(Variables->ScanParticle);
+
+
+
+  
+  // As the code was designed, these should not be necessary
+  RealMomentumDir.set(0, 0, 0);
+  MomDirPer.set(0, 0, 0);
+  if( anEvent->GetEventID()==0)  StepEventTheta =0;
+
+  // the angle to scan the bar middle to top
+  G4double PhiMax = atan(
+			 (Constants->Barlength[Constants->NoOfBars-1]*cm /2.)/ //The largest bar
+			 ((Variables->centralWallDistance) + Constants->WallSeparation) // the closest wall
+			 );
+
+
+  G4double PhiStep = PhiMax/20.; // 20 points to scan
+  G4int StepEventPhi = (anEvent->GetEventID()) % 20;
+       
+  G4double phi = PhiStep * StepEventPhi; // start horizontally
+    
+  // From the central angle, I move to one of the side bars.
+  // This is the initial point of the horizontal scan
+
+  //bad coding. In principle, each wall is scanned 220 events
+  // I could set calling run/beamOn 1 to run 440 events
+  if( (anEvent->GetEventID()) < 220) // 
+    // this is the angle separation, center to center, of each bar in a wall, seem from the vertex
+    {
+      WallDist = Variables->centralWallDistance;
+      WallCentAng =  Variables->centralWallAngle;
+    }
+  else
+    {
+      WallDist = Variables->centralWallDistance + (Variables -> leftWallDistance);
+      WallCentAng =  Variables->centralWallAngle + (Variables -> leftWallAngle);
+    }
+  ThetaStep = atan ( Constants->BarWidth/ WallDist);
+  ThetaMax = WallCentAng - (ThetaStep * 5); 
+  theta = ThetaMax + (ThetaStep * StepEventTheta);
+
+  // Set the momentum vector direction in the X-Z plane to the initial point
+  MomentumDir.setX( sin(theta) );
+  MomentumDir.setY( 0 );
+  MomentumDir.setZ( cos(theta) );
+
+  // I coded an orthogonal vector function, because I didn't get CLHEP function to work
+  MomDirPer = orthovector( MomentumDir);
+  // I want to rotate wrt a vector which is perpendicular to the direction vector, but in the X-Z plane
+  MomDirPer.setY(0);  
+
+  // The step to move from bar to bar
+  if((int) (anEvent->GetEventID())%20 == 19) StepEventTheta++;
+  if((int) (anEvent->GetEventID()) == 219) StepEventTheta = 0; //another bad coding! 
+>>>>>>> origin/debug
   // Define the final vector and rotate it
   RealMomentumDir = MomentumDir;
   RealMomentumDir.rotate(-phi, MomDirPer); // +phi angle goes down the hall 
@@ -391,7 +467,11 @@ void LADPrimaryGeneratorAction::LUND(G4Event* anEvent)
   else
     {
       G4cout<<"RETURN FALSE"<<G4endl;
+<<<<<<< HEAD
       anEvent -> SetEventAborted();
+=======
+       
+>>>>>>> origin/debug
       G4RunManager::GetRunManager() -> AbortRun(false);
 
     }

@@ -126,7 +126,11 @@ void LADEventAction::BeginOfEventAction(const G4Event* event)
 
   EventID = event -> GetEventID();  
 
+<<<<<<< HEAD
   // vEnergyDep.clear();
+=======
+   // vEnergyDep.clear();
+>>>>>>> origin/debug
   // vPadNumber.clear();
 
   // G4cout<<"LADEventAction::BoE GOING TO ANALYSIS "<< G4endl;
@@ -164,7 +168,11 @@ void LADEventAction::EndOfEventAction(const G4Event* event)
   if(Variables->GeneratorCase == 2)
     {
       LundRead -> Clear(); 
+<<<<<<< HEAD
     }
+=======
+      }
+>>>>>>> origin/debug
 
   auto printModulo = G4RunManager::GetRunManager()->GetPrintProgress();
   if ( ( printModulo > 0 ) && ( eventID % printModulo == 0 ) ) {
@@ -182,6 +190,7 @@ void LADEventAction::EndOfEventAction(const G4Event* event)
     // G4cout<<"LADEventAction::EoE GOING TO ANALYSIS "<< G4endl;
     AnalysisHodo->EndOfEventAction(event);
 
+<<<<<<< HEAD
     // Here is where we can extract the information of the GEMs
     // I will try make vectors.
  
@@ -222,6 +231,49 @@ void LADEventAction::EndOfEventAction(const G4Event* event)
 
 
   
+=======
+
+
+  // Here is where we can extract the information of the GEMs
+  // I will try make vectors.
+ 
+  for (G4int iDet = 0; iDet < kDim; ++iDet)
+    {
+      auto hc = GetHC(event, fGEMHCID[iDet]);
+      if ( ! hc ) return;
+     
+      auto nhit = hc->GetSize();
+     
+      for (unsigned long i = 0; i < nhit; ++i)
+	{
+	  LADGEMHit *hit = static_cast<LADGEMHit*>(hc->GetHit(i));
+	  G4ThreeVector localPos = hit->GetLocalPos();
+	  G4ThreeVector worldPos = hit->GetWorldPos();
+
+	  G4cout<<"Getting data: "<<localPos.x()<<", "<< localPos.y()<<", "<< hit->GetLevel()<<", "<<iDet<<G4endl;
+	  fHistoManager -> AddXloc(localPos.x());
+	  fHistoManager -> AddYloc(localPos.y());
+	  fHistoManager -> AddZloc(localPos.z());
+
+	  fHistoManager -> AddXglo(worldPos.x());
+	  fHistoManager -> AddYglo(worldPos.y());
+	  fHistoManager -> AddZglo(worldPos.z());
+
+
+	  fHistoManager -> AddTchamber(hit -> GetTime());//time
+	  fHistoManager -> AddgLevel(hit -> GetLevel() );
+	  fHistoManager -> AddChamber(iDet);
+	  fHistoManager -> AddgPDG( hit -> GetPDG() );
+
+	 
+	}
+    }
+ 
+
+ 
+  fHistoManager -> FillGEM(eventID);
+ 
+>>>>>>> origin/debug
 }  
 
 

@@ -57,7 +57,10 @@ bool LADLUNDReader::ReadFile()
       msg << "End of File. Exceed number of run/beamOn events" << G4endl;
       G4Exception("LADLUNDReader::ReadFile()",
                   "Code001", RunMustBeAborted, msg);
+<<<<<<< HEAD
       exit(0);// yep!! radical approach!!
+=======
+>>>>>>> origin/debug
       return false ;
       
     }

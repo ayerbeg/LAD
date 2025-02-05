@@ -1,0 +1,16 @@
+# LAD construction variables
+
+
+# HODOSCOPE construction
+
+# Angles of the hodoscope side walls  are given wrt to the central wall
+# left wall is a double wall (larger angle)
+# right wall is the single wall (smaller angle)
+
+# Angles in deg
+
+centralWallAngle 127 #default 127 deg
+
+# angles in absolute value
+leftWallAngle 23  #default 23 deg
+rightWallAngle 23 #default 23 deg
