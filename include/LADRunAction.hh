@@ -4,6 +4,10 @@
 #include "G4UserRunAction.hh"
 #include "globals.hh"
 #include "LADSteppingAction.hh"
+
+#include "LADVariables.hh"
+#include "LADLUNDReader.hh"
+
 #include "HodoAnalysis.hh"
 #include "LADEventAction.hh"
 #include "TTree.h"
@@ -48,7 +52,7 @@ class HistoManager;
 
 class LADRunAction : public G4UserRunAction
 {
-  public:
+public:
   LADRunAction(HistoManager*,  HodoAnalysis *);
   ~LADRunAction();
   
@@ -71,6 +75,9 @@ class LADRunAction : public G4UserRunAction
   // void SetEventID(G4int v){fEventID = v;}
   // void SetEDepTot(G4double v){fEDepTot = v;}
   // void Setpaddle(G4int v){fpaddle = v;}
+
+
+  G4Run *GetaRun(){return aRun;}
   
 private: 
   

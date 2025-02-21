@@ -21,38 +21,38 @@ class G4HCofThisEvent;
 
 
 /*
-class LADGEMSD: public G4VSensitiveDetector
-{
+  class LADGEMSD: public G4VSensitiveDetector
+  {
   public:
-    LADGEMSD(const G4String& name,
-	     const G4String& hitsCollectionName, G4int );
-    ~LADGEMSD() override = default;
+  LADGEMSD(const G4String& name,
+  const G4String& hitsCollectionName, G4int );
+  ~LADGEMSD() override = default;
 
-    // methods from base class
-    void   Initialize(G4HCofThisEvent* hitCollection) override;
-    G4bool ProcessHits(G4Step* step, G4TouchableHistory* history) override;
-    void   EndOfEvent(G4HCofThisEvent* hitCollection) override;
+  // methods from base class
+  void   Initialize(G4HCofThisEvent* hitCollection) override;
+  G4bool ProcessHits(G4Step* step, G4TouchableHistory* history) override;
+  void   EndOfEvent(G4HCofThisEvent* hitCollection) override;
 
   private:
-    GEMHitsCollection* fHitsCollection = nullptr;
-    G4int fNofCells = 0;
-};
+  GEMHitsCollection* fHitsCollection = nullptr;
+  G4int fNofCells = 0;
+  };
 */
 
 class LADGEMSD : public G4VSensitiveDetector
 {
-  public:
-    LADGEMSD(G4String name);
-    ~LADGEMSD() override = default;
-
-    void Initialize(G4HCofThisEvent*HCE) override;
-    G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist) override;
+public:
+  LADGEMSD(G4String name);
+  ~LADGEMSD() override = default;
+  
+  void Initialize(G4HCofThisEvent*HCE) override;
+  G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist) override;
   void   EndOfEvent(G4HCofThisEvent* hitCollection) override;
 
-  private:
+private:
   LADGEMHitsCollection* fHitsCollection = nullptr;
   //  DriftChamberHitsCollection* fHitsCollection = nullptr;
-    G4int fHCID = -1;
+  G4int fHCID = -1;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

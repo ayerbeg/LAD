@@ -1,0 +1,152 @@
+#include "LADMaterials.hh"
+// #include "LADVariablen.hh"
+// #include "LADSettings.hh"
+
+#include "G4Element.hh"
+#include "G4Material.hh"
+
+LADMaterials::LADMaterials()
+{
+  G4String name, symbol;             //a=mass of a mole;
+  G4double a, z, density;            //z=mean number of protons;
+  
+  G4int    ncomponents, natoms;
+  G4double fractionmass;
+  G4double temperature, pressure;
+  
+  //
+  // Chemist Elements
+  //
+  
+  G4Element* H  = new G4Element(name="Hydrogen",symbol="H" , z= 1., a=1.01*g/mole);
+  G4Element* C  = new G4Element(name="Carbon"  ,symbol="C" , z= 6., a=12.01*g/mole);
+  G4Element* N  = new G4Element(name="Nitrogen",symbol="N" , z= 7., a=14.01*g/mole);
+  G4Element* O  = new G4Element(name="Oxygen"  ,symbol="O" , z= 8., a=16.00*g/mole);
+  G4Element* Si = new G4Element(name="Silicon", symbol="Si" ,z= 14.,a=28.09*g/mole);
+  G4Material * Al = new G4Material(name="Aluminium", z=13., a=26.98*g/mole,  density=2.70*g/cm3);
+  G4Material * Fe = new G4Material(name="Iron",      z=26., a=55.845*g/mole, density=7.87*g/cm3);
+  G4Material * Cu = new G4Material(name="Copper",    z=29., a=63.546*g/mole, density=8.96*g/cm3);
+  G4Material * W = new G4Material(name="Tungsten",    z=74., a=183.84*g/mole, density=19.3*g/cm3);
+
+  
+  //
+  // Air
+  //
+  G4Material* Air = new G4Material(name="Air"  , density= 1.290*mg/cm3, ncomponents=2);
+  Air->AddElement(N, fractionmass=0.78);
+  Air->AddElement(O, fractionmass=0.22);
+  
+  //
+  // Physic Vacuum
+  //
+  Vacuum = new G4Material("Vacuum", z=1., a=1.01*g/mole, density= universe_mean_density,
+                           kStateGas, 2.73*kelvin, 3.e-18*pascal);
+ 
+  
+  //
+  // Hydrogen\
+  //
+  
+  /* REAL lH2 */
+  G4Material* lH2 = new G4Material(name="lH2", density=67.9347 * kg/m3, ncomponents=1,
+				   kStateLiquid,temperature=21.2*kelvin,pressure= 1.950*bar);
+  lH2->AddElement(H, 2);
+
+  //
+  // Water
+  //
+  G4Material* matH2O = new G4Material("Water", density=1.000*g/cm3, 2);
+  matH2O->AddElement(H,2);
+  matH2O->AddElement(O,1);
+  
+  
+  // Lead material defined using NIST Manager
+  G4NistManager *nistManager = G4NistManager::Instance();
+  G4Pb = nistManager->FindOrBuildMaterial("G4_Pb");
+
+  G4Element *elH = nistManager -> FindOrBuildElement("H"); //Define hydrogen with natural isotopic abundances
+  G4Element *elC = nistManager -> FindOrBuildElement("C");
+
+  
+  liquidArgon = new G4Material("liquidArgon", z=18., a= 39.95*g/mole, density= 1.390*g/cm3);
+         // The argon by NIST Manager is a gas with a different density
+
+ // Get materials
+  defaultMaterial = Vacuum;
+  absorberMaterial = G4Pb;
+  gapMaterial = liquidArgon;
+
+
+
+  /* 
+  //------------------------------------------------------
+  //------------- Plastic Scintillator BC408--------------
+  //-- I copied this definition from a unknown code ------
+  //------------------------------------------------------
+  
+  G4double BC480density =1.032*g/cm3;
+  G4Material*  BC408 = new G4Material("BC408", BC408density, nElem=2);
+  BC408->AddElement(H, nAtoms=521);
+  BC408->AddElement(C, nAtoms=474);
+
+  const G4int nEntries2= 35;
+  G4double PhotonEnergy2[nEntries2]= { 3.55, 3.47, 3.393, 3.315, 3.256, 3.195, 3.141, 3.103, 3.077, 3.056, 3.031, 3.011, 2.997, 2.983, 2.965, 2.956, 2.939, 2.921, 2.906, 2.890, 2.867, 2.852, 2.834, 2.83, 2.81, 2.796, 2.766, 2.72, 2.686, 2.653, 2.60, 2.55, 2.49, 2.38, 2.25  };
+  G4double RINDEX_BC408[nEntries2] ={ 1.58, 1.58, 1.58, 1.58, 1.58,1.58, 1.58, 1.58, 1.58, 1.58,1.58, 1.58,1.58,1.58,1.58, 1.58, 1.58, 1.58, 1.58, 1.58,1.58, 1.58, 1.58, 1.58, 1.58,1.58, 1.58,1.58,1.58,1.58,1.58,1.58,1.58,1.58,1.58 };
+  G4double ABSORPTION_BC408[nEntries2] ={ 210*cm, 210*cm, 210*cm, 210*cm, 210*cm,210*cm, 210*cm, 210*cm, 210*cm, 210*cm,210*cm, 210*cm , 210*cm, 210*cm , 210*cm ,210*cm, 210*cm, 210*cm, 210*cm, 210*cm,210*cm, 210*cm, 210*cm, 210*cm, 210*cm, 210*cm, 210*cm , 210*cm, 210*cm , 210*cm, 210*cm, 210*cm , 210*cm, 210*cm , 210*cm };
+  G4double SCINTILLATION_BC408[nEntries2] = {0,0.017,0.03,0.049,0.071,0.101,0.152,0.220,0.288,0.374,0.478,0.585,0.668,0.735,0.804,0.846,0.897,0.947,0.984, 1.0, 0.981,0.945, 0.877,0.796,0.698,0.614,0.534,0.451,0.366,0.278,0.191, 0.133, 0.076,0.025,0};
+
+  G4MaterialPropertiesTable *BC408_mt = new G4MaterialPropertiesTable();
+  BC408_mt->AddProperty("RINDEX", PhotonEnergy2, RINDEX_BC408, nEntries2);
+  BC408_mt->AddProperty("ABSLENGTH", PhotonEnergy2, ABSORPTION_BC408, nEntries2);
+  BC408_mt->AddProperty("FASTCOMPONENT", PhotonEnergy2, SCINTILLATION_BC408,nEntries2);
+  BC408_mt->AddConstProperty("SCINTILLATIONYIELD",500./MeV);
+  BC408_mt->AddConstProperty("RESOLUTIONSCALE",1.0);
+  BC408_mt->AddConstProperty("FASTTIMECONSTANT", 1.*ns);
+  BC408_mt->AddConstProperty("YIELDRATIO",1.);
+  // what about alpha quenching factor?
+  BC408->GetIonisation()->SetBirksConstant(0.126*mm/MeV);
+
+  BC408->SetMaterialPropertiesTable(BC408_mt);
+
+*/
+
+  
+  // FROM G4SBS (modified) for BC-408
+  // Let's start simple and later we can add optical properties
+
+  
+  G4double d_PolyVinylToluene = 0.57*g/cm3;
+  G4double d_Anthracene = 1.28*g/cm3;
+  G4double BC408density = 1.032*g/cm3;
+  
+  G4Material* PolyVinylToluene = new G4Material( "PolyVinylToluene", d_PolyVinylToluene, 2 );
+  PolyVinylToluene->AddElement(elC, fractionmass = 0.91471);
+  PolyVinylToluene->AddElement(elH, fractionmass = 0.08529);
+  
+  G4Material* Anthracene = new G4Material( "Anthracene", d_Anthracene, 2 );
+  Anthracene->AddElement(elC, fractionmass = 0.943447);
+  Anthracene->AddElement(elH, fractionmass = 0.056553);
+
+
+  BC408 = new G4Material( "BC408", BC408density,  2 );
+  BC408 -> AddMaterial(PolyVinylToluene, fractionmass = 0.36);
+  BC408 -> AddMaterial(Anthracene, fractionmass = 0.64);
+  
+  
+
+  
+  G4cout << "<LADMaterials::LADMaterials> --- Debugging ---"      << G4endl;
+  //  G4cout << *(G4Material::GetMaterialTable()) << G4endl;
+    
+
+
+
+
+    
+}
+
+LADMaterials::~LADMaterials()
+{
+  if (verbose > 1)      
+    G4cout << "<LADDetectorConstructionSFCreator~> END" << G4endl; 
+}

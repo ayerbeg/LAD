@@ -42,30 +42,53 @@ void HistoManager::Book()
   
   
   
-  eventtree = new TTree("eventtree","Hodo Summary");
+  hodopos = new TTree("hodoposition","Hodo Position");
+  hodoene = new TTree("hodoenergy","Hodo Energy");
 
+  gemana = new TTree("gemana","GEM analysis");
+  
   // This method works, do we need structure? 
-  // eventtree ->Branch("EventID",event.EventID,"EventID/I");
-  // eventtree ->Branch("EDepTot",&event.EDepTot,"EDepTot/D");
-  // eventtree ->Branch("paddle",&event.paddle,"paddle/I");
+  // hodotree ->Branch("EventID",event.EventID,"EventID/I");
+  // hodotree ->Branch("EDepTot",&event.EDepTot,"EDepTot/D");
+  // hodotree ->Branch("paddle",&event.paddle,"paddle/I");
 
 
-  eventtree ->Branch("EventID", &fEventID,"EventID/I");
-  eventtree ->Branch("EDepTot", &fEDepTot,"EDepTot/D");
-  eventtree ->Branch("paddle" , &fpaddle, "paddle/I");
+
+  
+  hodopos -> Branch("vXbar", &vXbar );
+  hodopos -> Branch("vYbar", &vYbar );
+  hodopos -> Branch("vZbar", &vZbar );
+  hodopos -> Branch("vTbar", &vTbar );
+  hodopos -> Branch("vPaddle", &vPaddle );
+  hodopos -> Branch("vTrackID",  &vTrackID );
 
 
-  eventtree -> Branch("vPadCopy", &vPadCopy );
-  eventtree -> Branch("vEneDep", &vEneDep );
-  eventtree -> Branch("vPDG", &vPDG );
-  eventtree -> Branch("vLevel", &vLevel );
+  hodoene -> Branch("EventID",   &fEventID,"EventID/I");
+  hodoene -> Branch("vPadCopy", &vPadCopy );
+  hodoene -> Branch("vEneDep",  &vEneDep );
+  hodoene -> Branch("vPDG",     &vPDG );
+  hodoene -> Branch("vLevel",   &vLevel );
 
 
-  eventtree -> Branch("vXbar", &vXbar );
-  eventtree -> Branch("vYbar", &vYbar );
-  eventtree -> Branch("vZbar", &vZbar );
-  eventtree -> Branch("vPadPosition", &vPadPosition );
 
+  // GEM 
+  //local coordinates
+  gemana -> Branch("vXloc", &vXloc );
+  gemana -> Branch("vYloc", &vYloc );
+  gemana -> Branch("vZloc", &vZloc );
+  //global coordinates
+  gemana -> Branch("vXglo", &vXglo );
+  gemana -> Branch("vYglo", &vYglo );
+  gemana -> Branch("vZglo", &vZglo );
+  
+  gemana -> Branch("vTchamber", &vTchamber );
+  gemana -> Branch("vChamber", &vChamber );
+  gemana -> Branch("vgPDG",  &vgPDG );
+  gemana -> Branch("vgLevel",  &vgLevel );
+
+
+
+  
   
   // create 1st ntuple
   // fNtuple1 = new TTree("Ntuple1", "Edep");
@@ -88,7 +111,8 @@ void HistoManager::Save()
   if (rootfile == nullptr) { return;
   }
   
-  eventtree->Write();
+  hodopos->Write();
+  hodoene->Write();
  
   rootfile->Write();        // Writing the histograms to the file
   rootfile->Close();  // and closing the tree (and the file)
@@ -142,7 +166,38 @@ void HistoManager::FillNtuple1(G4double energyAbs, G4double energyGap,
 }
 
 
-void HistoManager::FillTest(G4int ID)
+
+
+
+
+
+
+void HistoManager::FillHodoEnergy(G4int ID)
+{
+  G4cout<<"Filling NTuples"<<G4endl;
+  //  G4cout<<"EVentID: "<< fEventID<<" EDepTot: "<< fEDepTot <<" paddle: "<< fpaddle<<G4endl;
+
+  fEventID = ID;
+  
+  G4cout<<"***EVentID (finished): "<<ID<<G4endl;
+    
+
+  // The variables are filled in the corresponding detector classes.
+  hodoene->Fill();
+    
+  G4cout<<"Filled Energy NTuples"<<G4endl;
+
+  vPadCopy.clear();
+  vEneDep.clear();
+  vPDG.clear();
+  vLevel.clear();
+
+
+}
+
+
+
+void HistoManager::FillHodoPosition(G4int ID)
 {
   G4cout<<"Filling NTuples"<<G4endl;
   //  G4cout<<"EVentID: "<< fEventID<<" EDepTot: "<< fEDepTot <<" paddle: "<< fpaddle<<G4endl;
@@ -151,27 +206,56 @@ void HistoManager::FillTest(G4int ID)
   
   G4cout<<"***EVentID: "<<ID<<G4endl;
     
-  if (eventtree != nullptr)
-    {
-      G4cout<<"NO TREE!!"<<G4endl;
-    }
-  
-  eventtree->Fill();
+  // The variables are filled in the corresponding detector classes.
+  hodopos->Fill();
     
-  G4cout<<"Filled NTuples"<<G4endl;
-
-  vPadCopy.clear();
-  vEneDep.clear();
-  vPDG.clear();
-  vLevel.clear();
+  G4cout<<"Filled Position NTuples"<<G4endl;
 
   vXbar.clear();
   vYbar.clear();
   vZbar.clear();
-  vPadPosition.clear();
-  // if (fNtuple1 != nullptr) { fNtuple1->Fill(); }
-  // if (fNtuple2 != nullptr) { fNtuple2->Fill(); }
+  vTbar.clear();
+  vPaddle.clear();
+  vTrackID.clear();
+
 }
+
+
+
+
+
+
+void HistoManager::FillGEM(G4int ID)
+{
+  G4cout<<"Filling GEM"<<G4endl;
+  //  G4cout<<"EVentID: "<< fEventID<<" EDepTot: "<< fEDepTot <<" paddle: "<< fpaddle<<G4endl;
+
+  fEventID = ID;
+  
+  G4cout<<"***EVentID: "<<ID<<G4endl;
+    
+  // The variables are filled in the corresponding detector classes.
+  gemana ->Fill();
+    
+  G4cout<<"Filled GEM leaves"<<G4endl;
+
+  
+  vXloc.clear();
+  vYloc.clear();
+  vZloc.clear();
+
+  vXglo.clear();
+  vYglo.clear();
+  vZglo.clear();
+
+  vTchamber.clear();
+  vgLevel.clear();
+  vChamber.clear();
+  vgPDG.clear();
+  
+}
+
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

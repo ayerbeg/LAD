@@ -10,6 +10,9 @@
 #include "HistoManager.hh"
 
 #include "HodoAnalysis.hh"
+
+#include "LADLUNDReader.hh"
+
 class HodoAnalysis;
 
 class LADPrimaryGeneratorAction;
@@ -18,6 +21,10 @@ class HistoManager;
 class LADRunAction;
 class LADEventAction;
 class LADSteppingAction;
+
+
+//class LADLUNDReader
+
 /// Action initialization class.
 
 class LADActionInitialization : public G4VUserActionInitialization

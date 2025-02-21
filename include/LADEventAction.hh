@@ -5,6 +5,8 @@
 #include "LADRunAction.hh"
 //#include "LADHodoHit.hh"
 #include <vector>
+#include "LADVariables.hh"
+//#include "LADLUNDReader.hh"
 
 #include "globals.hh"
 
@@ -16,6 +18,12 @@
 /// In EndOfEventAction(), it prints the accumulated quantities of the energy 
 /// deposit and track lengths of charged particles in Absober and Gap layers 
 /// stored in the hits collections.
+
+
+// This is what I don't like of the SD code I am using. I need to force
+// the number of GEMs chambers (hard coded). 
+const G4int kDim = 2;
+
 
 class HodoAnalysis;
 
@@ -35,7 +43,7 @@ public:
   G4double GetEDepTot() {return EDepTot;}  
   G4int    Getpaddle()     {return paddle;}
 
-  void FillEvent(G4int copy, G4double ene);
+  //  void FillEvent(G4int copy, G4double ene);
   
   // void SetEventID(G4int v){EventID = v;}
   // void SetEDepTot(G4double v){EDepTot = v;}
@@ -49,8 +57,8 @@ private:
   // LADHodoHitsCollection* GetHitsCollection(G4int hcID,
   //                                           const G4Event* event) const;
   void PrintEventStatistics(G4double absoEdep) const;
-    // , G4double absoTrackLength,
-    //                         G4double gapEdep, G4double gapTrackLength) const;
+  // , G4double absoTrackLength,
+  //                         G4double gapEdep, G4double gapTrackLength) const;
   
   // data members                   
   G4int  fAbsHCID;
@@ -66,10 +74,12 @@ private:
   LADRunAction* fRunAct = nullptr;
   HistoManager* fHistoManager  = nullptr;
 
-  vector<G4double> vEnergyDep;
-  vector<G4int>    vPadNumber;
+  // vector<G4double> vEnergyDep;
+  // vector<G4int>    vPadNumber;
 
-  
+  // I guess the use of array is similar to vector, but more elegant?
+  //  fGEMHCID -> GEM Hits Collection ID 
+  std::array<G4int, kDim> fGEMHCID = { -1, -1 };
 };
                      
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

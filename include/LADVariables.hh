@@ -32,8 +32,9 @@ public:
   G4bool G4GUI; // G4 terminal or GUI
 
   G4int GeneratorCase;
-
-
+  G4String ScanParticle;
+  G4double ScanMomentumParticle;
+  
 private:
 	G4bool ReadBoolean(G4String Value);
 	

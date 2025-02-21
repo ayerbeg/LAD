@@ -30,14 +30,14 @@ LADRunAction::LADRunAction(HistoManager* histo, HodoAnalysis *HodoHandle): fHist
 
   
   if (HodoHandle!=NULL) AnalysisHodo=HodoHandle;
- 
+
+
 }
 
 
 LADRunAction::~LADRunAction()
 {
   G4cout<<"<LADRunAction::~LADRunAction()>: closing"<<G4endl;
-  //   delete EventAction;
 }
 
 
@@ -72,13 +72,23 @@ void LADRunAction::BeginOfRunAction(const G4Run* run) // The pointer run was com
   aRun = const_cast<G4Run *>(run);//a POINTER to the present run to use in the rest of the code
 
 
+  if(Variables->GeneratorCase == 2)
+    {
+      G4cout<<">>>>>>>>>>>>>LUND generator (open file)<<<<<<<<<<<  "<<Variables->GeneratorCase<<G4endl;
+      LundRead -> OpenFile();
+      
+    }
 
+  
   // Going to HodoAnalysis
   //  if (StepAction!=NULL) StepAction->RunStartAction(run);
 
   G4cout<<"Going to HodoAnalysis"<<G4endl;
   AnalysisHodo->BeginOfRunAction(run);
 
+
+
+  
   // event.EventID = 0;
   // event.EDepTot = 0;
   // event.paddle = 0;
@@ -107,6 +117,14 @@ void LADRunAction::EndOfRunAction(const G4Run* run)
   G4int NbOfEvents = run->GetNumberOfEvent(); 
   G4cout<<" NbOfEvents: "<< NbOfEvents<<G4endl;
 
+
+  if(Variables->GeneratorCase == 2)
+    {
+      G4cout<<">>>>>>>>>>>>>LUND generator (closing file)<<<<<<<<<<<  "<<G4endl;
+      LundRead -> CloseFile();
+      
+    }
+  
   if (NbOfEvents == 0) {
     // close open files
     fHistoManager->Save();

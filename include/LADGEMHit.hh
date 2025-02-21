@@ -131,14 +131,27 @@ public:
   void Add(G4double de);
   G4double GetEdep() const;
 
-  
+  void SetLevel(G4int xyz) { iLevel = xyz; }
+  G4int GetLevel() const { return iLevel; }
+
+  void SetPDG(G4int xyz) { iPDG = xyz; }
+  G4int GetPDG() const { return iPDG; }
+
 private:
   G4int fLayerID = -1;
+
   G4double fTime = 0.;
   G4ThreeVector fLocalPos;
   G4ThreeVector fWorldPos;
+  G4double fEdep = 0.;
 
-  G4double fEdep = 0.; 
+  G4int iLevel = 0;
+  G4int iPDG = 0;
+
+ 
+  
+
+  
 };
 
 using LADGEMHitsCollection = G4THitsCollection<LADGEMHit>;
@@ -164,10 +177,10 @@ inline G4double LADGEMHit::GetEdep() const {
 
 inline void LADGEMHit::Add(G4double de)
 {
-  G4cout<<"fEdep (1): "<<fEdep<<G4endl;
-  G4cout<<"de: "<<de<<G4endl;
+  // G4cout<<"fEdep (1): "<<fEdep<<G4endl;
+  //  G4cout<<"de: "<<de<<G4endl;
   fEdep += de;
-  G4cout<<"fEdep (2): "<<fEdep<<G4endl;
+  //  G4cout<<"fEdep (2): "<<fEdep<<G4endl;
 
 }
 

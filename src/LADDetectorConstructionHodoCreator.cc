@@ -169,17 +169,20 @@ void LADDetectorConstructionHodoCreator::BuildHodo(G4LogicalVolume *worldLV, LAD
 					  "Bar_LV");         // its name
 	      
 	      //     G4cout<<"pos: "<<width*pp<<" wall: "<<ww+ws<<G4endl;
-	      
+
+	      // The bars are placed in the same direction as we build
+	      // the rest of the walls clockwise
+	     
 	      new G4PVPlacement(nullptr,                                                    // no rotation
-				G4ThreeVector( ((WallWidth/2 - width/2)- width*pp),0, 0),  // its position
+				G4ThreeVector( ((WallWidth/2 - width/2)- width*pp),0, 0),   // its position
 				BarLV,                                                      // its logical volume
-				"Bar_phy",                                                      // its name
+				"Bar_phy",                                                  // its name
 				wallLV[ww+ws+ww],                                           // its mother volume
 				false,                                                      // no boolean operation
 				(ww*10000)+(ws*100)+pp,                                     // copy number
 				fCheckOverlaps);                                            // checking overlaps
 	      //NOTE: with this copy number, each Bar has an unique ID
-	      
+
 	    }
 	  if(ww+ws+ww == 5) break; // just 5 walls
 	}

@@ -1,0 +1,123 @@
+#include "LADConstants.hh"
+
+LADConstants::LADConstants()
+{
+  // In an ideal world, all of these could be read from a DB.
+  // Here we use brute force. Normally, these guys are constant along the experiment
+  
+  
+  // HODO SPECIFICATION AND  DIMENSIONS
+
+  NoOfBars = 11;
+
+  NoOfWalls = 3;
+  NoOfSubWalls = 2;
+  NoOfPanels = 5;
+
+  
+  
+  BarThick = 5.08 *cm;
+  BarWidth = 22.0 *cm;
+
+  WallSeparation = 40.6*cm;
+
+  Barlength  = {387.5,
+		393.3,
+		399.0,
+		404.8,
+		410.5,
+		416.3,
+		422.0,
+		427.8,				  
+		433.6,
+		439.3,
+		445.1 };
+
+  
+
+  
+  /* 
+  
+	SFT1hoehe = 400*cm;
+	SFT1breite= 200*cm;
+	SFT1tiefe = 570*cm;
+	SFT2tiefe = 400*cm;
+	SFPbDicke = 50 * cm;
+
+	ExperimentierhalleX=20*m;
+	ExperimentierhalleY=30*m;
+	//	ExperimentierhalleZ=28.4*m;
+	ExperimentierhalleZ=50*m;
+	
+	EintrittsHoehe  = 206 * mm;
+	EintrittsBreite = 694 * mm;
+	EintrittsVerschiebung = 25 * mm;
+	DipolPosX =  -50 * mm; // Im Koordinatensystem Target = (0,0,0) Lars
+	//DipolPosX =  0 * mm; // Im Koordinatensystem Target = (0,0,0) Carlos test
+  	Polschuhabstand =  200 * mm;
+
+	DCIRadius = 3820*mm;
+	DCIBreite = 220*mm; // 340*mm original, 220*mm nach Umbau
+	DCIBreiteBisSpule = 350*mm; // Abstand Radius bis Kante Spule
+	DCIGap = 110*mm;
+	DCIWinkelbreite = 30 * deg;
+	TargetLaenge = 48 * mm;
+//	AufhaengungMWPC = G4ThreeVector(1185*mm,0,2212*mm);
+	AufhaengungMWPC = G4ThreeVector(1570*mm,0,2180*mm);
+	MWPCAbstand = 375*mm;
+	MWPCBreite = 120*cm; // real
+//	MWPCBreite = 140*cm; // fuer bessere Transfermatrix
+	MWPCDicke = 10.5 * cm;
+	MWPCOrtOffset = 79*mm - 164*mm; // 79mm fuer die Skala und 164mm Abstand Kammerende-Draehte
+	CherenkovAbstand = G4ThreeVector(200*mm,0,0*mm);
+
+  	KolliDicke = 5*cm;
+  	KolliBreite = 728*mm;
+  	KolliHoehe = 263*mm;
+  	KolliLochBreite = 353*mm;
+  	KolliLochHoehe = 10*cm;
+  	Kolliabstand = 1.44*m-1*m;
+  	Kolliversatz = 50*mm;
+
+	SciFiDurchmesser = 0.83 * mm;
+	SciFiKanalzahl = 24*96; // 24 Tripleboards a 96 Kanäle
+	SciFiKanalzahl_th = SciFiKanalzahl; // +0 Tripleboards a 96 Kanäle
+	SciFiKanalzahl_y = 2000; // einzelne Kanäle mit SSPMTs
+//	SciFiKanalzahl_y = 20; // 5 Tripleboards a 96 Kanäle
+	CladdingDicke = 0.05 * mm;
+	SciFiHoehe = 30 * cm; // 30 cm max durch Geometrie(was 40)
+	SciFiYKantenlaenge=2*mm;
+
+	StSigma = 100;
+//	EinTeslaImpuls = 756.805*MeV;  // fuer z1=1363, z2=1844 // falsch
+	EinTeslaImpuls = 681.716*MeV;  // fuer z1=1363, z2=1844  neu
+	
+	FDetDrehung = 37*deg;
+	
+	TraegerBreite1 = 85*cm;
+	TraegerBreite2 = 45*cm;
+	TraegerBreite3 = 45*cm;
+	TraegerBreite4 = 16*cm;
+	TraegerHoehe = 1*m;
+	TraegerTiefe1 = 16*cm;
+	TraegerTiefe2 = 14*cm;
+	TraegerTiefe4 = 16*cm;
+	Traeger1Abstand = 585*mm;
+	Traeger2Abstand = 1470*mm;
+	Traeger23Abstand = 1330*mm - TraegerTiefe2;
+	Traeger34Abstand = 270*mm;
+	
+	SpekBImpulsbreite = 0.08;
+	
+	
+	Variationsschritte  = 1;
+	Winzigkeit = 0.1 * mm;
+  */
+}
+
+LADConstants::~LADConstants()
+{
+	G4cout << "<LADConstants::~LADConstants>: End Read" << G4endl;
+}
+
+LADConstants *Constants=NULL;

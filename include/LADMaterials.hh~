@@ -1,0 +1,42 @@
+#ifndef LADMaterials_H
+#define LADMaterials_H 1
+#include "globals.hh"
+#include "G4SystemOfUnits.hh"
+#include "G4NistManager.hh"
+#include "G4PhysicalConstants.hh"
+
+
+class G4Material;
+
+class LADMaterials
+{
+public:
+  
+  LADMaterials();
+  ~LADMaterials();
+
+  G4Material*        defaultMaterial;
+  G4Material*        Vacuum;
+  G4Material*        absorberMaterial;
+  G4Material*        gapMaterial;
+  
+  G4Material*        liquidArgon;
+
+  
+  //Using NIST manager
+  G4Material         *G4Pb;
+  G4Element          *elH;
+  G4Element          *elC;
+
+  G4Material*        BC408;
+
+  
+
+  
+private:
+
+  G4int              verbose;
+
+};
+
+#endif
