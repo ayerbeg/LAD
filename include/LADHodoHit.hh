@@ -10,11 +10,7 @@
 // namespace LADHodo
 // {
 
-/// Calorimeter hit class
-///
-/// It defines data members to store the the energy deposit and track lengths
-/// of charged particles in a selected volume:
-/// - fEdep, fTrackLength
+
 
 class LADHodoHit : public G4VHit
 {

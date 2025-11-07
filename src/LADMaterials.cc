@@ -24,18 +24,38 @@ LADMaterials::LADMaterials()
   G4Element* N  = new G4Element(name="Nitrogen",symbol="N" , z= 7., a=14.01*g/mole);
   G4Element* O  = new G4Element(name="Oxygen"  ,symbol="O" , z= 8., a=16.00*g/mole);
   G4Element* Si = new G4Element(name="Silicon", symbol="Si" ,z= 14.,a=28.09*g/mole);
-  G4Material * Al = new G4Material(name="Aluminium", z=13., a=26.98*g/mole,  density=2.70*g/cm3);
+  Al = new G4Material(name="Aluminium", z=13., a=26.98*g/mole,  density=2.70*g/cm3);
   G4Material * Fe = new G4Material(name="Iron",      z=26., a=55.845*g/mole, density=7.87*g/cm3);
 
   G4Material * W = new G4Material(name="Tungsten",    z=74., a=183.84*g/mole, density=19.3*g/cm3);
 
-   
   //
   // Physic Vacuum
   //
   Vacuum = new G4Material("Vacuum", z=1., a=1.01*g/mole, density= universe_mean_density,
                            kStateGas, 2.73*kelvin, 3.e-18*pascal);
  
+
+  // ----  gas and liquid deuterium (Lucas/Tyler)
+
+  // Deuteron isotope
+  G4Isotope* deuteron  = new G4Isotope("deuteron", 1, 2, 2.0141018*g/mole);
+  
+  // Deuterium element
+  G4Element* deuterium = new G4Element("deuterium", "deuterium", 1);
+  deuterium->AddIsotope(deuteron, 1);
+  
+  // Liquid Deuterium
+  D2_liquid = new G4Material("LD2", 0.174*g/cm3, 1, kStateLiquid, 19.0*kelvin);
+  D2_liquid->AddElement(deuterium, 2);
+  
+  // Hydrogen Gas (T = 19.5 K, P = 470 mTorr)
+  H2_gas = new G4Material("H2_gas", density = 0.47 / 760.0 * 273.15 / 19.5 * 0.08988 * mg / cm3, 
+			  ncomponents = 1, kStateGas, 19.5 * kelvin, 0.47 / 760.0 * atmosphere);
+  H2_gas->AddElement(H, natoms = 2);
+
+
+
   
   //
   // Hydrogen\

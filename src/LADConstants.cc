@@ -19,6 +19,12 @@ LADConstants::LADConstants()
   BarThick = 5.08 *cm;
   BarWidth = 22.0 *cm;
 
+// These numbers come from the NIM paper
+// units in inches, should be converted to mm. (it is done in the constructor)
+  KaptonThick = 0.0094;
+  AluminumThick = 0.001;
+  LeadThick = 0.005;
+
   WallSeparation = 40.6*cm;
 
   Barlength  = {387.5,
