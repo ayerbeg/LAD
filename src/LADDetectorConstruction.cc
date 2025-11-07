@@ -88,9 +88,114 @@ G4VPhysicalVolume* LADDetectorConstruction::DefineVolumes()
   GEMCreator = new LADDetectorConstructionGEMCreator();
   GEMCreator ->BuildGEM(worldLV, Materials);
 
+
+/*
+ //----------------------------------------------------------------------------------------------------------
+  // TARGET CHAMBER
+
+  double r_chamber = 40. * cm;
+  double t_chamber = 0.406 * mm;
+
+  G4Tubs *target_mother_tubs = 
+          new G4Tubs("targ_mother_tubs", 
+                      0., 
+                      50. * cm, 
+                      50. * cm, 
+                      0. * deg, 
+                      360. * deg);
+
+  G4LogicalVolume *target_mother_log =
+          new G4LogicalVolume(target_mother_tubs,  
+                            Materials-> Vacuum,
+                            "target_mother_logical", 0, 0, 0);
   
-  worldLV->SetVisAttributes(G4VisAttributes::GetInvisible());
-  return worldPV;
+  G4RotationMatrix *rotX_neg90 = new G4RotationMatrix();
+  rotX_neg90->rotateX(-90. * deg);
+  G4RotationMatrix *rotX_pos90 = new G4RotationMatrix();
+  rotX_pos90->rotateX(90. * deg);
+
+  G4VPhysicalVolume *target_mother_phys =
+          new G4PVPlacement(rotX_neg90, 
+                            G4ThreeVector(), 
+                            target_mother_log, 
+                            "target_mother_physical", 
+                            worldLV, 
+                            false, 
+                            0);
+
+  // Target chamber exit window
+  G4Tubs *chamber_tubs = 
+          new G4Tubs("chamber_tubs", 
+                      r_chamber, 
+                      r_chamber + t_chamber, 
+                      20. * cm, 
+                      0. * deg, 
+                      360. * deg);
+ 
+  G4LogicalVolume *chamber_log = 
+          new G4LogicalVolume(chamber_tubs, 
+                              Materials->Al, 
+                              "chamber_logical", 0, 0, 0);
+  
+  // // original
+  G4VPhysicalVolume *chamber_phys =
+          new G4PVPlacement(0, 
+                            G4ThreeVector(), 
+                            chamber_log, 
+                            "chamber_physical", 
+                            target_mother_log, 
+                            false, 
+                            0);
+
+
+
+  G4double length = 20.0 * cm;
+  G4double radius = 0.5 * cm;
+  G4double window = 0.125 * mm;
+  G4double wall   = 0.2 * mm;
+  wall = 1.0 * mm;
+
+
+
+  // Target cell
+  G4Tubs *cell_tubs            = new G4Tubs("cell_tubs", 0., radius + wall, length / 2. + window, 0. * deg, 360. * deg);
+  G4Tubs *cell_empt            = new G4Tubs("cell_empt", 0., radius, length / 2., 0. * deg, 360. * deg);
+  G4SubtractionSolid *cell_sub = new G4SubtractionSolid("cell_sub", cell_tubs, cell_empt);
+  // G4LogicalVolume *cell_log    = new G4LogicalVolume(cell_sub, fMaterial->vacuum, "cell_logical", 0, 0, 0);
+  G4LogicalVolume *cell_log = new G4LogicalVolume(cell_sub, Materials->Al, "cell_logical", 0, 0, 0); //
+  // original
+  G4VPhysicalVolume *cell_phys =
+      new G4PVPlacement(rotX_pos90, G4ThreeVector(), cell_log, "cell_physical", target_mother_log, false, 0);
+
+
+ // Target liquid volume
+  G4Tubs *liquid_tubs         = new G4Tubs("liquie_tubs", 0., radius, length / 2., 0. * deg, 360. * deg);
+  // G4LogicalVolume *liquid_log = new G4LogicalVolume(liquid_tubs, fMaterial->vacuum, "liquid_logical", 0, 0, 0);
+  G4LogicalVolume *liquid_log = new G4LogicalVolume(liquid_tubs, Materials->D2_liquid, "liquid_logical", 0, 0, 0); //
+  // original
+  G4VisAttributes *liquid_vis = new G4VisAttributes(G4Colour(0., 0., 1.));
+  liquid_log->SetVisAttributes(liquid_vis);
+  G4VPhysicalVolume *liquid_phys =
+      new G4PVPlacement(rotX_pos90, G4ThreeVector(), liquid_log, "liquid_physical", target_mother_log, false, 0);
+
+// Why was this line here?
+//G4VPhysicalVolume *target_mother_phys =
+//   new G4PVPlacement(rotX_neg90, G4ThreeVector(), target_mother_log, "target_mother_physical", worldLV, false, 0);
+
+//target_mother_log->SetVisAttributes(G4VisAttributes(G4Colour::Grey()));
+target_mother_log->SetVisAttributes(G4VisAttributes::GetInvisible());
+chamber_log->SetVisAttributes(G4VisAttributes(G4Colour::Red()));
+cell_log->SetVisAttributes(G4VisAttributes(G4Colour::Grey()));
+
+///----------------------------------------------------------------------------------------------------------
+// Target chamber end
+///----------------------------------------------------------------------------------------------------------
+  
+*/
+
+worldLV->SetVisAttributes(G4VisAttributes::GetInvisible());
+return worldPV;
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

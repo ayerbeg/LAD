@@ -22,6 +22,11 @@ public:
   
   G4Material*        liquidArgon;
 
+  G4Material * Al;
+
+  //From Lucas/Tyler code
+  G4Material * H2_gas;
+  G4Material * D2_liquid;
   
   //Using NIST manager
   G4Material         *G4Pb;

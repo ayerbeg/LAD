@@ -34,11 +34,22 @@ public:
   
   void BuildHodo(G4LogicalVolume *worldLV, LADMaterials *Materials);
   void ConstructSDandField();
+  static const G4double inch;
+
 private:
 
   G4double thick;
   G4double width;
   G4double length; // the largest Bar
+  
+
+  G4double KaptonThick;
+  G4double AluminumThick;
+  G4double LeadThick;
+
+  G4double KaptonBoxThick;
+
+   
   
   //A container to place the scintillator Bars
   // static const G4int NoOfWalls = 5;
@@ -84,6 +95,16 @@ private:
   G4RotationMatrix rmW4;
 
   vector<G4RotationMatrix> rmW;
+
+  G4Box* Kapton; //solid
+  G4LogicalVolume* KaptonLV;//logic volume
+
+  G4Box* LeadPlate; //solid
+  G4LogicalVolume* LeadPlateLV;//logic volume
+
+  G4Box* AlumSheets;
+  G4LogicalVolume* AlumSheetsLV;//logic volume
+
 
   G4Box* BarS; //solid
   G4LogicalVolume* BarLV;//logic volume

@@ -19,7 +19,9 @@ public:
   G4int NoOfSubWalls;
   G4int NoOfPanels;
 
-
+  G4double KaptonThick;
+  G4double AluminumThick;
+  G4double LeadThick;
   
   G4double BarThick;
   G4double BarWidth;

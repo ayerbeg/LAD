@@ -6,7 +6,7 @@
 
 #include "LADDetectorConstructionHodoCreator.hh"
 #include "LADDetectorConstructionGEMCreator.hh"
-
+#include "G4SubtractionSolid.hh"
 
 class G4VPhysicalVolume;
 class G4GlobalMagFieldMessenger;
@@ -45,6 +45,11 @@ class LADDetectorConstruction : public G4VUserDetectorConstruction
   LADMaterials *Materials;
   LADDetectorConstructionHodoCreator *HodoCreator;
   LADDetectorConstructionGEMCreator *GEMCreator;
+
+
+
+
+
 
   // methods
   //
