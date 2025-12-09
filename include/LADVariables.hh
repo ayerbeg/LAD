@@ -34,6 +34,8 @@ public:
   G4int GeneratorCase;
   G4String ScanParticle;
   G4double ScanMomentumParticle;
+
+  G4String DISrootFile;
   
 private:
 	G4bool ReadBoolean(G4String Value);

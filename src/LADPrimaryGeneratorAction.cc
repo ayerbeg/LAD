@@ -11,7 +11,12 @@
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
 
+#include "TFile.h"
+#include "TTree.h"
+#include "TDirectory.h"
+
 #include "G4RandomDirection.hh"
+#include <string>
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -21,6 +26,10 @@ LADPrimaryGeneratorAction::LADPrimaryGeneratorAction()
   // I Have to check THIS!!
   G4int nofParticles = 1;
   fParticleGun = new G4ParticleGun(nofParticles);
+
+  // Guns used by DISgen()
+  fElectronGun = new G4ParticleGun(1);
+  fRecoilGun   = new G4ParticleGun(1);
 
   // default particle kinematic
   //
@@ -55,6 +64,8 @@ LADPrimaryGeneratorAction::LADPrimaryGeneratorAction()
 LADPrimaryGeneratorAction::~LADPrimaryGeneratorAction()
 {
   delete fParticleGun;
+  delete fElectronGun;
+  delete fRecoilGun;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -117,6 +128,11 @@ void LADPrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       {
 	//	ScanLAD(anEvent); // just for test
 	LUND(anEvent);
+	break;
+      }
+    case 3: // DIS generator (from DIS ROOT file)
+      {
+	DISgen(anEvent);
 	break;
       }
     default:
@@ -399,6 +415,140 @@ void LADPrimaryGeneratorAction::LUND(G4Event* anEvent)
 
 
 }
+
+
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+void LADPrimaryGeneratorAction::DISgen(G4Event* anEvent)
+{
+    // ---- Static (run-once) variables ----
+    static bool   first = true;
+    static TFile* f     = nullptr;
+    static TTree* T     = nullptr;
+
+    // ROOT branch variables (types must match the DIS ROOT file)
+    static double pe[3];     // electron momentum [GeV]
+    static double prec[3];   // recoil momentum [GeV]
+    static int    pidrec;    // recoil PDG code
+    static double zvtx;      // vertex z in cm
+    static double weight;    // event weight (unused here)
+
+    if (first)
+    {
+        // Ensure DISrootFile is loaded from LAD.ini
+        if (Variables->DISrootFile == "")
+        {
+            G4Exception("LADPrimaryGeneratorAction::DISgen",
+                        "MissingDISFile",
+                        FatalException,
+                        "DISrootFile not set in LAD.ini!");
+        }
+
+        G4String disFilePath = Variables->DISrootFile;
+        TDirectory* prevDir = gDirectory;  // Save current directory
+
+        // Open DIS ROOT file
+        f = TFile::Open(disFilePath.c_str(), "READ");
+        if (!f || f->IsZombie())
+        {
+            G4String msg = "Cannot open DIS file: " + disFilePath;
+            G4Exception("LADPrimaryGeneratorAction::DISgen",
+                        "FileOpenError",
+                        FatalException,
+                        msg.c_str());
+        }
+
+        // Load tree
+        T = (TTree*)f->Get("T");
+        if (!T)
+        {
+            G4Exception("LADPrimaryGeneratorAction::DISgen",
+                        "TreeError",
+                        FatalException,
+                        "Cannot find tree T in DIS file.");
+        }
+
+        // Bind branches (double arrays)
+        T->SetBranchAddress("pe",     pe);
+        T->SetBranchAddress("prec",   prec);
+        T->SetBranchAddress("pidrec", &pidrec);
+        T->SetBranchAddress("zvtx",   &zvtx);
+        T->SetBranchAddress("weight", &weight);
+
+        G4cout << "[DISgen] Loaded DIS file '" << disFilePath
+               << "' with " << T->GetEntries() << " events." << G4endl;
+
+        // Restore output directory (so histogram file is unaffected)
+        if (prevDir) prevDir->cd();
+
+        first = false;
+    }
+
+    // ---- Get event index ----
+    G4int    evtID    = anEvent->GetEventID();
+    Long64_t nEntries = T->GetEntries();
+
+    if (evtID >= nEntries)
+    {
+        G4String msg = "G4 event ID " + std::to_string(evtID) +
+                       " exceeds DIS entries " +
+                       std::to_string((long long)nEntries);
+        G4Exception("LADPrimaryGeneratorAction::DISgen",
+                    "EventOutOfRange",
+                    FatalException,
+                    msg.c_str());
+    }
+
+    // ---- Read from ROOT ----
+    T->GetEntry(evtID);
+
+    // ---- Convert coordinates (zvtx is in cm in the ROOT file) ----
+    G4ThreeVector vertex(0., 0., zvtx * cm);
+
+    // ==================================================
+    //  Scattered electron (use fElectronGun)
+    // ==================================================
+    G4ThreeVector pe_vec(pe[0], pe[1], pe[2]);
+    G4ParticleDefinition* eDef =
+        G4ParticleTable::GetParticleTable()->FindParticle("e-");
+    if (!eDef)
+    {
+        G4Exception("LADPrimaryGeneratorAction::DISgen",
+                    "NoElectronDefinition",
+                    FatalException,
+                    "Cannot find particle definition for e-.");
+    }
+
+    fElectronGun->SetParticleDefinition(eDef);
+    fElectronGun->SetParticleMomentumDirection(pe_vec.unit());
+    fElectronGun->SetParticleMomentum(pe_vec.mag() * GeV);
+    fElectronGun->SetParticlePosition(vertex);
+    fElectronGun->GeneratePrimaryVertex(anEvent);
+
+    // ==================================================
+    //  Recoil nucleon (use fRecoilGun)
+    // ==================================================
+    G4ThreeVector pr_vec(prec[0], prec[1], prec[2]);
+
+    G4ParticleDefinition* recDef =
+        G4ParticleTable::GetParticleTable()->FindParticle(pidrec);
+
+    if (!recDef)
+    {
+        G4Exception("LADPrimaryGeneratorAction::DISgen",
+                    "UnknownPID",
+                    JustWarning,
+                    ("Unknown recoil PID = " + std::to_string(pidrec)).c_str());
+        return;
+    }
+
+    fRecoilGun->SetParticleDefinition(recDef);
+    fRecoilGun->SetParticleMomentumDirection(pr_vec.unit());
+    fRecoilGun->SetParticleMomentum(pr_vec.mag() * GeV);
+    fRecoilGun->SetParticlePosition(vertex);
+    fRecoilGun->GeneratePrimaryVertex(anEvent);
+}
+
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
 
 
 
