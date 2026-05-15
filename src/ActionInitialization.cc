@@ -32,7 +32,7 @@
 #include "RunAction.hh"
 #include "EventAction.hh"
 
-using namespace B4;
+//using namespace B4;
 
 namespace B4d
 {
