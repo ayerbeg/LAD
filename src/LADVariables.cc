@@ -57,7 +57,7 @@ LADVariables::LADVariables()
 	leftWallDistance    =  92 *cm;  // wrt to the centralWall
 	rightWallDistance   =  92 *cm; // wrt to the centralWallAngle
 
-
+	DISrootFile = "";
 
 }
 
@@ -105,6 +105,8 @@ LADVariables::LoadFromFile(G4String FileName)
 
 				READSTRING(ScanParticle);
 				READDOUBLE(ScanMomentumParticle, MeV); 
+
+				READSTRING(DISrootFile);
 				
 			} // if getline
 		} // if not end of file
@@ -112,7 +114,7 @@ LADVariables::LoadFromFile(G4String FileName)
 	} // if infile
 	else
 	{
-		G4cerr << "Konnte Datei nicht zum lesen öffnen!" << G4endl;
+		G4cerr << "Konnte Datei nicht zum lesen ï¿½ffnen!" << G4endl;
 		return -1;
 	} // if infile else
 }

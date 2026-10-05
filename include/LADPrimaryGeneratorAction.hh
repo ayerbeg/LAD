@@ -34,10 +34,14 @@ public:
   void ScanLAD(G4Event*);
   void Raster(G4Event* event);
   void LUND(G4Event* event);
+  void DISgen(G4Event* event);
 
   
 private:
   G4ParticleGun* fParticleGun = nullptr; // G4 particle gun
+  
+  G4ParticleGun* fElectronGun;   // used by DISgen() for scattered e-
+  G4ParticleGun* fRecoilGun;     // used by DISgen() for recoil p
 
   G4ParticleDefinition *particle;
   
