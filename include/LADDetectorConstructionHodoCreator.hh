@@ -21,6 +21,7 @@ using namespace std;
 
 
 class G4VPhysicalVolume;
+class G4AssemblyVolume;
 
 //class LADMaterials;
 
@@ -37,6 +38,8 @@ public:
   static const G4double inch;
 
 private:
+
+#include "LADDetectorConstructionFramesCreator.hh"
 
   G4double thick;
   G4double width;

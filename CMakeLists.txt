@@ -43,6 +43,8 @@ file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc
 #
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
+list(APPEND sources ${PROJECT_SOURCE_DIR}/src/LADDetectorConstructionFramesCreator.cc)
+list(REMOVE_DUPLICATES sources)
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
@@ -82,6 +84,7 @@ set(LAD_SCRIPTS
   run1.mac
   run2.mac
   vis.mac
+  dis.mac
   )
 
 foreach(_script ${LAD_SCRIPTS})

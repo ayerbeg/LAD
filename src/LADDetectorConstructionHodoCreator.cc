@@ -4,8 +4,12 @@
 #include "LADVariables.hh"
 
 #include "G4VisAttributes.hh"
+#include "G4AssemblyVolume.hh"
+#include "G4SubtractionSolid.hh"
 #include "LADMaterials.hh"
 //#include "G4SDManager.hh"
+
+#include <cmath>
 
 const G4double LADDetectorConstructionHodoCreator::inch = 25.4 * mm;
 
@@ -142,30 +146,91 @@ void LADDetectorConstructionHodoCreator::BuildHodo(G4LogicalVolume *worldLV, LAD
     {
       if(ww>1) SubWalls = 1; // because we have 2 double walls and 1 single.
       //Maybe a while loop could be more efficient
+
+      // A double-wall stand is one rigid structure, so both of its panels must
+      // retain their nominal relative pose.  Compute the component-wise average
+      // correction for both layers; the single wall uses its layer-0 values.
+      G4ThreeVector wallAlignmentShift = Variables->hodoShift[ww][0];
+      G4ThreeVector wallAlignmentRotate = Variables->hodoRotate[ww][0];
+      if (SubWalls == 2) {
+        wallAlignmentShift =
+          0.5 * (Variables->hodoShift[ww][0] +
+                 Variables->hodoShift[ww][1]);
+        wallAlignmentRotate =
+          0.5 * (Variables->hodoRotate[ww][0] +
+                 Variables->hodoRotate[ww][1]);
+      }
+
+      // Temporarily disable dxyz and dangle while checking stand clearances:
+      wallAlignmentShift = G4ThreeVector();
+      wallAlignmentRotate = G4ThreeVector();
       
       G4cout<<"Wall "<<ww<<G4endl;
 
-      for (G4int ws = 0; ws < SubWalls; ws++)
-	{ 
-	  G4cout<<"SubWall "<<ws<<G4endl;
+	      for (G4int ws = 0; ws < SubWalls; ws++)
+			{
+		  G4cout<<"SubWall "<<ws<<G4endl;
 
-	  wallLV[ww+ws+ww]
-	    = new G4LogicalVolume(
-				  wall,                       // its solid
-				  Materials->defaultMaterial, // its material
-				  "SciWall");                 // its name
-	  
-	  wallPV = new G4PVPlacement(G4Transform3D(
-						   rmW[ww+ws+ww],
-						   (G4ThreeVector( vSeparationX[ww], vSeparationY[ww], vSeparationZ[ww]) +
-						    G4ThreeVector( vSpaceX[ww]*ws, vSpaceY[ww]*ws, vSpaceZ[ww]*ws  )
-						    )),
-				     wallLV[ww+ws+ww],               // its logical volume
-				     "SciWall",                      // its name
-				     worldLV,                        // its mother  volumeAluminumThick
-				     false,                          // no boolean operation
-				     ww+ws+ww,                       // copy number
-				     fCheckOverlaps);
+		  G4int panelIndex = ww + ws + ww;
+
+		  wallLV[panelIndex]
+		    = new G4LogicalVolume(
+					  wall,                       // its solid
+					  Materials->defaultMaterial, // its material
+					  "SciWall");                 // its name
+
+			  G4ThreeVector wallPosition =
+			    G4ThreeVector( vSeparationX[ww], vSeparationY[ww], vSeparationZ[ww]) +
+			    G4ThreeVector( vSpaceX[ww]*ws, vSpaceY[ww]*ws, vSpaceZ[ww]*ws ) +
+			    wallAlignmentShift;
+
+			  G4RotationMatrix alignRot;
+			  alignRot.rotateX(wallAlignmentRotate.x());
+			  alignRot.rotateY(wallAlignmentRotate.y());
+			  alignRot.rotateZ(wallAlignmentRotate.z());
+
+		  G4RotationMatrix wallRotation = alignRot * rmW[panelIndex];
+
+		  wallPV = new G4PVPlacement(G4Transform3D(
+							   wallRotation,
+							   wallPosition),
+					     wallLV[panelIndex],               // its logical volume
+					     "SciWall",                      // its name
+					     worldLV,                        // its mother  volumeAluminumThick
+					     false,                          // no boolean operation
+					     panelIndex,                      // copy number
+					     fCheckOverlaps);
+
+          BuildPanel3Frame(worldLV, Materials, panelIndex, wallPosition, wallRotation);
+
+          // Each double wall has one rigid stand.  Its local Z origin is the
+          // midpoint between the two nominally separated Panel 3 layers, while
+          // both layers and the stand share the averaged alignment correction.
+          if (SubWalls == 2 && ws == SubWalls - 1) {
+            G4ThreeVector doubleWallCenter =
+              G4ThreeVector(vSeparationX[ww],
+                            vSeparationY[ww],
+                            vSeparationZ[ww]) +
+              0.5 * G4ThreeVector(vSpaceX[ww],
+                                  vSpaceY[ww],
+                                  vSpaceZ[ww]) +
+              wallAlignmentShift;
+            BuildDoubleStand(worldLV,
+                             Materials,
+                             ww,
+                             doubleWallCenter,
+                             wallRotation);
+          }
+
+          // The third wall has one scintillator layer and uses the single-wall
+          // stand defined by drawing 67506-00006.
+          if (ww == Constants->NoOfWalls - 1) {
+            BuildSingleStand(worldLV,
+                             Materials,
+                             panelIndex,
+                             wallPosition,
+                             wallRotation);
+          }
 
 	  
 	  // There is something magic calling with the same name each solid and logic
@@ -186,13 +251,13 @@ void LADDetectorConstructionHodoCreator::BuildHodo(G4LogicalVolume *worldLV, LAD
 
         //Need to recall the Kapton box for each Bar
         new G4PVPlacement(nullptr,                                                    // no rotation
-				                G4ThreeVector( ((WallWidth/2 - 2*AluminumThick + KaptonThick - width/2 -0.5*cm)- ((2*AluminumThick + KaptonThick + width/2)*2)*pp),0, 0),   // its position
-				                KaptonLV,                                                   // its logical volume
-				                "KaptonPhy",                                                // its name
-				                wallLV[ww+ws+ww],                                           // its mother volume
-				                false,                                                      // no boolean operation
-				                (ww*10000)+(ws*100)+pp,                                     // copy number (for layers around the bar won´t be necessaery)
-				                fCheckOverlaps);                                            // checking overlaps
+					                G4ThreeVector( ((WallWidth/2 - 2*AluminumThick + KaptonThick - width/2 -0.5*cm)- ((2*AluminumThick + KaptonThick + width/2)*2)*pp),0, 0),   // its position
+					                KaptonLV,                                                   // its logical volume
+					                "KaptonPhy",                                                // its name
+					                wallLV[panelIndex],                                          // its mother volume
+					                false,                                                      // no boolean operation
+					                (ww*10000)+(ws*100)+pp,                                     // copy number (for layers around the bar won´t be necessaery)
+					                fCheckOverlaps);                                            // checking overlaps
 	      //NOTE: with this copy number, each Bar has an unique ID
 
 
