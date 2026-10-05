@@ -2,3 +2,5 @@
 *~
 *old
 *#
+# Build directories (build out-of-source, e.g. ../LADHodo-build)
+build/
