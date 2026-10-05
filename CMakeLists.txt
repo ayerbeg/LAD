@@ -51,6 +51,24 @@ add_executable(LAD LAD.cc ${sources} ${headers})
 target_link_libraries(LAD ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} )
 
 #----------------------------------------------------------------------------
+# Optional, machine-specific: force the Qt GUI to use X11 (XWayland) instead
+# of native Wayland, where the Geant4 OpenGL Qt viewer may not render properly.
+# Default OFF. Enable with -DLAD_FORCE_X11=ON. An explicitly set
+# QT_QPA_PLATFORM in the environment always takes precedence.
+#
+option(LAD_FORCE_X11 "Force Qt GUI to use X11/XWayland (QT_QPA_PLATFORM=xcb)" OFF)
+if(LAD_FORCE_X11)
+  target_compile_definitions(LAD PRIVATE LAD_FORCE_X11)
+  message(WARNING "LAD_FORCE_X11=ON: LAD will force the Qt GUI to use X11/XWayland "
+                  "(QT_QPA_PLATFORM=xcb) unless QT_QPA_PLATFORM is already set. "
+                  "This is a machine-specific workaround; disable with -DLAD_FORCE_X11=OFF.")
+elseif(DEFINED ENV{WAYLAND_DISPLAY})
+  message(STATUS "LAD: Wayland session detected. If the Geant4 Qt viewer does not "
+                 "render properly, run with QT_QPA_PLATFORM=xcb or reconfigure with "
+                 "-DLAD_FORCE_X11=ON.")
+endif()
+
+#----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build B4d. This is so that we can run the executable directly because it
 # relies on these scripts being in the current working directory.

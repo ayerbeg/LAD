@@ -36,6 +36,8 @@
 
 #include "G4ScoringManager.hh"
 
+#include <cstdlib>   // setenv (LAD_FORCE_X11)
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -53,6 +55,16 @@ namespace {
 
 int main(int argc,char** argv)
 {
+#ifdef LAD_FORCE_X11
+  // Built with -DLAD_FORCE_X11=ON: run the Qt GUI through X11/XWayland.
+  // Must happen before Qt is initialised; does not override a user setting.
+  if (!std::getenv("QT_QPA_PLATFORM")) {
+    setenv("QT_QPA_PLATFORM", "xcb", 0);
+    G4cout << "LAD: built with LAD_FORCE_X11, Qt GUI forced to X11/XWayland "
+           << "(QT_QPA_PLATFORM=xcb). Set QT_QPA_PLATFORM to override." << G4endl;
+  }
+#endif
+
   // Evaluate arguments
   //
   if ( argc > 7 ) {
